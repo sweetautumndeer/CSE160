@@ -1,0 +1,58 @@
+﻿<!--
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Autumn Moulios ~ 4/4/2021 ~ CSE 160
+
+Assignment 0
+Implementation of vector operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Draw a blue rectangle (canvas version)</title>
+	</head>
+	
+	<body onload="main()">
+	  <canvas id="example" width="400" height="400">
+	  Please use a browser that supports "canvas"
+	  </canvas>
+
+	  </br>	
+	  <!-- Read the x and y coordinates for v1 specified by the user in that order -->
+	  v1: x <input value="X" id="v1_x" type="number"></input>
+	  y <input value="Y" id="v1_y" type="number"></input>
+
+	  </br>
+	  <!-- v2 coordinates -->
+	  v2: x <input value="X" id="v2_x" type="number"></input>
+	  y <input value="Y" id="v2_y" type="number"></input>
+
+	  <!-- Button input to draw -->
+	  </br>
+	  <input value="Draw" type="button" onclick="handleDrawEvent()"></input>
+
+	  </br></br>
+	  <!-- Read the x and y coordinates specified by the user in that order -->
+	  Operation: <select id="operation">
+				   <option value="Add">Add</option>
+				   <option value="Subtract">Subtract</option>
+				   <option value="Multiply">Multiply</option>
+				   <option value="Divide">Divide</option>
+				   <option value="Magnitude">Magnitude</option>
+				   <option value="Normalize">Normalize</option>
+				   <option value="Angle">Angle between</option>
+				   <option value="Area">Area</option>
+				 </select>
+	  Scalar: <input value="Scalar" id="scalar" type="number"></input>
+
+	  <!-- Button input to do vector math -->
+	  </br>
+	  <input value="Draw" type="button" onclick="handleDrawOperationEvent()"></input>
+
+
+	  <script src="asg0.js"></script>
+	  <script src="lib\cuon-matrix-cse160.js"></script>
+	</body>
+</html>

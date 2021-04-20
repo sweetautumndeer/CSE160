@@ -1,0 +1,46 @@
+﻿<!--
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Autumn Moulios ~ 4/11/2021 ~ CSE 160
+// amoulios
+// 
+// Assignment 1
+// Drawing a Cylinder
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Program 1: Draw a Unit Cylinder</title>
+	</head>
+	
+	<body onload="main()">
+	  <canvas id="cvs1" width="400" height="400">
+	  Please use a browser that supports "canvas"
+	  </canvas>
+
+	  </br>	
+	  <!-- Take input for the number of sides to the circle (n) and whether to draw the endcaps-->
+	  Number of Sides: <input value="n" id="n" type="number"></input>
+	  </br>
+	  Draw Endcaps: <select id="endcaps">
+						<option value="True">True</option>
+						<option value="False">False</option>
+	                </select>
+	  <!-- <input value="endcaps" id="endcaps" type="checkbox"></input> -->
+
+	  <!-- Button input to draw -->
+	  </br>
+	  <input value="Draw" type="button" onclick="drawUnitCylinderFromInput()"></input>
+
+	  <!-- load main -->
+	  <script src="asg1.js"></script>
+
+	  <!-- load external libraries -->
+	  <script src="../lib/cuon-matrix-cse160.js"></script>
+	  <script src="../lib/cuon-utils.js"></script>
+	  <script src="../lib/webgl-debug.js"></script>
+	  <script src="../lib/webgl-utils.js"></script>
+	</body>
+</html>
