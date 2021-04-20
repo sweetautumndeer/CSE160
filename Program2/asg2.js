@@ -36,6 +36,22 @@ var VSHADER = `
 	}
 `;
 
+var WIREFRAMEVSHADER = `
+	precision mediump float;
+
+	attribute vec3 a_Position;
+
+	uniform mat4 u_Model;
+	uniform vec3 u_Color
+
+	varying vec4 v_Color;
+
+	void main() {
+		v_Color = vec4(u_Color, 1.0);
+		gl_Position = u_Model * vec4(a_Position, 1.0);
+	}
+`;
+
 // gl_Position = u_Scaling * u_Rotation * vec4(a_Position, 1.0) + vec4(u_Translation, 1.0);
 
 // Fragment Shader
@@ -104,7 +120,7 @@ function main() {
 function defineParameters() {
 	// create model matrix for transformations
 	let modelMatrix = new Matrix4();
-	modelMatrix.rotate(30, 1, 0, 0);
+	modelMatrix.rotate(60, 1, 0, 0);
 	modelMatrix.translate(0, 0, 0);
 	modelMatrix.scale(0.5, 0.5, 0.5);
 
@@ -191,19 +207,6 @@ function drawWireframe(vertexArray, polygonsArray) {
 	// set fragment shader color
 	defineFragColor([1.0, 0.0, 0.0]);
 
-	// create model matrix for transformations
-	let modelMatrix = new Matrix4();
-	modelMatrix.rotate(30, 1, 0, 0);
-	modelMatrix.translate(0, 0, 0);
-	modelMatrix.scale(0.5, 0.5, 0.5);
-
-	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
-	gl.uniformMatrix4fv(u_Model, false, modelMatrix.elements);
-	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
-	gl.uniform3f(u_LightDirection, 1.0, 1.0, 1.0);
-	let u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
-	gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
-
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer); // vertexBuffer assigned to an array buffer in webgl
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer); // same for indicesBuffer
 
@@ -258,7 +261,7 @@ function drawSolid(vertexArray, polygonsArray, normalArray) {
 
 
 // call drawUnitCylinder using the input from the user
-function drawUnitCylinderFromInput() {
+function createUnitCylinderFromInput() {
 	// grab the inputs
 	n = document.getElementById("n").value;
 	console.log("number of sides: " + n);
@@ -266,7 +269,7 @@ function drawUnitCylinderFromInput() {
 	console.log("endcaps: " + (endcaps == "True"));
 	drawMode = document.getElementById("mode").value;
 
-	drawUnitCylinder(n, endcaps);
+	createUnitCylinder(n, endcaps);
 }
 
 function calculateNormals() {
@@ -315,7 +318,7 @@ function calculateNormals() {
 }
 
 // draw a unit cylinder with n-sided circular faces
-function drawUnitCylinder(n, endcaps) {
+function createUnitCylinder(n, endcaps) {
 	// clear the canvas
 
 	gl.clear(gl.COLOR_BUFFER_BIT);
