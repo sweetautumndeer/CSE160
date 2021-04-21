@@ -118,18 +118,10 @@ function main() {
 }
 
 function defineParameters() {
-	// create model matrix for transformations
-	let modelMatrix = new Matrix4();
-	modelMatrix.rotate(60, 1, 0, 0);
-	modelMatrix.translate(0, 0, 0);
-	modelMatrix.scale(0.5, 0.5, 0.5);
-
 	// grab variables from shaders
-	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
 	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
 	let u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
 
-	gl.uniformMatrix4fv(u_Model, false, modelMatrix.elements);
 	gl.uniform3f(u_LightDirection, 1.0, 0.0, -2.0);
 	gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
 
@@ -137,7 +129,7 @@ function defineParameters() {
 
 function drawAll() {
 	for (let obj of Objects) {
-		draw(obj.vertices, obj.polygons, obj.normals);
+		draw(obj);
 	}
 }
 
@@ -167,13 +159,13 @@ function initBuffer(attributeName, num) {
 }
 
 // draw a triangle from 3 points using WebGL
-function draw(vertexArray, polygonsArray, normalArray) {
+function draw(obj) {
 	// create triangle in cpu memory
-	let vertices = new Float32Array(vertexArray);
+	let vertices = new Float32Array(obj.vertices);
 	// create normals array in cpu memory
-	let normals = new Float32Array(normalArray);
+	let normals = new Float32Array(obj.normals);
 	// create indices array in cpu memory
-	let indices = new Uint16Array(polygonsArray);
+	let indices = new Uint16Array(obj.polygons);
 	// create indices buffer in gpu
 	let indicesBuffer = gl.createBuffer();
 	if (!indicesBuffer) {
@@ -184,7 +176,10 @@ function draw(vertexArray, polygonsArray, normalArray) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	// set fragment shader color
-	defineFragColor([1.0, 1.0, 1.0]);
+	//defineFragColor(obj.color);
+	defineFragColor([1.0, 0.0, 0.0]);
+	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
+	gl.uniformMatrix4fv(u_Model, false, obj.modelMatrix.elements);
 	
 	let vertexBuffer = initBuffer("a_Position", 3);
 	let normalBuffer = initBuffer("a_Normal", 3);
@@ -213,11 +208,19 @@ function createCylinderFromInput() {
 	let endcaps = document.getElementById("endcaps").value;
 	console.log("endcaps: " + (endcaps == "True"));
 	drawMode = document.getElementById("mode").value;
+	let color = document.getElementById("color").value;
+	console.log(color)
+
+	// create model matrix for cylinder
+	let modelMatrix = new Matrix4();
+	modelMatrix.rotate(60, 1, 0, 0);
+	modelMatrix.translate(0, 0, 0);
+	modelMatrix.scale(0.5, 0.5, 0.5);
 
 	//createUnitCylinder(n, endcaps);
 	Objects = [];
 
-	cylinder = new Cylinder(n, endcaps);
+	cylinder = new Cylinder(n, endcaps, color, modelMatrix);
 	Objects.push(cylinder);
 	console.log(cylinder);
 	drawAll();

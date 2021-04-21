@@ -3,9 +3,13 @@ class Cylinder {
 	vertices;
 	polygons;
 	normals;
+	color;
+	modelMatrix;
 
-	constructor(n, endcaps, modelMatrix) {
+	constructor(n, endcaps, color, modelMatrix) {
+		this.color = color;
 		this.modelMatrix = modelMatrix;
+		
 
 		// represent these as 2d arrays for easy reading during bugfixing
 		objVertices = []; // an array of 3D points
