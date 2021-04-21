@@ -204,25 +204,47 @@ function draw(obj) {
 function createCylinderFromInput() {
 	// grab the inputs
 	n = document.getElementById("n").value;
-	console.log("number of sides: " + n);
 	let endcaps = document.getElementById("endcaps").value;
-	console.log("endcaps: " + (endcaps == "True"));
 	drawMode = document.getElementById("mode").value;
 	let color = document.getElementById("color").value;
 	console.log(color)
 
-	// create model matrix for cylinder
-	let modelMatrix = new Matrix4();
-	modelMatrix.rotate(60, 1, 0, 0);
-	modelMatrix.translate(0, 0, 0);
-	modelMatrix.scale(0.5, 0.5, 0.5);
-
 	//createUnitCylinder(n, endcaps);
 	Objects = [];
+	let modelMatrix = new Matrix4();
 
 	cylinder = new Cylinder(n, endcaps, color, modelMatrix);
 	Objects.push(cylinder);
 	console.log(cylinder);
+
+	drawAll();
+}
+
+function transformObj() {
+	// grab all of the inputs
+	let rotateX = document.getElementById("rotationx").value;
+	let rotateY = document.getElementById("rotationy").value;
+	let rotateZ = document.getElementById("rotationz").value;
+	let scaleX = document.getElementById("scalex").value;
+	let scaleY = document.getElementById("scaley").value;
+	let scaleZ = document.getElementById("scalez").value;
+	let translateX = document.getElementById("translationx").value;
+	let translateY = document.getElementById("translationy").value;
+	let translateZ = document.getElementById("translationz").value;
+	//let objnum = document.getElementById("objnum").value;
+	let objnum = 0;
+
+	// create transformation matrix
+	let modelMatrix = new Matrix4();
+	modelMatrix.rotate(rotateX, 1, 0, 0);
+	modelMatrix.rotate(rotateY, 0, 1, 0);
+	modelMatrix.rotate(rotateZ, 0, 0, 1);
+	modelMatrix.scale(scaleX / 20, scaleY / 20, scaleZ / 20);
+	modelMatrix.translate(translateX / 100, translateY / 100, translateZ / 100);
+	
+	// apply matrix
+	Objects[objnum].modelMatrix = modelMatrix;
+
 	drawAll();
 }
 

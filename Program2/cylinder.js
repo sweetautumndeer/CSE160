@@ -14,8 +14,8 @@ class Cylinder {
 		// represent these as 2d arrays for easy reading during bugfixing
 		objVertices = []; // an array of 3D points
 		objPolygons = []; // an array of triangles in terms of 3 points
-		let centerTop = [0.0, 0.0, 1.0];
-		let centerBot = [0.0, 0.0, 0.0];
+		let centerTop = [0.0, 0.0, 0.5];
+		let centerBot = [0.0, 0.0, -0.5];
 
 		// define the n points of each circle using an angle value (theta)
 		// each point of the circles is defined by <cos(theta), sin(theta)>
@@ -25,8 +25,8 @@ class Cylinder {
 			let x = Math.cos(theta);
 			let y = Math.sin(theta);
 
-			objVertices.push([x, y, 1]);
-			objVertices.push([x, y, 0]);
+			objVertices.push([x, y, 0.5]);
+			objVertices.push([x, y, -0.5]);
 
 			theta += 2 * Math.PI / n;
 		}
@@ -99,10 +99,6 @@ class Cylinder {
 			//polygons.push(3*i);
 		}
 
-	}
-
-	calculateNormals(objVertices, objPolygons) {
-		
 	}
 
 	get vertices() {
