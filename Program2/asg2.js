@@ -269,7 +269,8 @@ function createUnitCylinderFromInput() {
 	console.log("endcaps: " + (endcaps == "True"));
 	drawMode = document.getElementById("mode").value;
 
-	createUnitCylinder(n, endcaps);
+	//createUnitCylinder(n, endcaps);
+	cylinder = new Cylinder(n, drawMode);
 }
 
 function calculateNormals() {
