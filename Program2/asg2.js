@@ -128,6 +128,7 @@ function defineParameters() {
 }
 
 function drawAll() {
+	gl.clear(gl.COLOR_BUFFER_BIT);
 	for (let obj of Objects) {
 		draw(obj);
 	}
@@ -173,8 +174,6 @@ function draw(obj) {
 		return false;
 	}
 
-	gl.clear(gl.COLOR_BUFFER_BIT);
-
 	// set fragment shader color
 	//defineFragColor(obj.color);
 	defineFragColor(obj.color);
@@ -206,12 +205,15 @@ function createCylinderFromInput() {
 	n = document.getElementById("n").value;
 	let endcaps = document.getElementById("endcaps").value;
 	drawMode = document.getElementById("mode").value;
-	let color = document.getElementById("color").value;
-	console.log(color)
 
 	//createUnitCylinder(n, endcaps);
-	Objects = [];
+	//Objects = [];
 	let modelMatrix = new Matrix4();
+	let cylinders = document.getElementById("objnum");
+	let newCyl = document.createElement("option");
+	newCyl.text = Objects.length.toString();
+	newCyl.value = Objects.length;
+	cylinders.add(newCyl);
 
 	cylinder = new Cylinder(n, endcaps, color, modelMatrix);
 	Objects.push(cylinder);
@@ -220,6 +222,37 @@ function createCylinderFromInput() {
 	transformObj();
 }
 
+// remove a cylinder from the scene
+function removeCylinder() {
+	// remove last option from the selection input
+	// later we refactor the array to match with the remaining nums
+	let objnum = document.getElementById("objnum");
+	objnum.remove(Objects.length - 1);
+
+	// remove cylinder from Objects array
+	Objects.splice(objnum.value, 1);
+
+	// redraw
+	drawAll();
+}
+
+// load the selected cylinder's attributes into the user input
+// UNIMPLEMENTED
+function changeSelectedObj() {
+	let rotateX = document.getElementById("rotationx");
+	let rotateY = document.getElementById("rotationy");
+	let rotateZ = document.getElementById("rotationz");
+	let scaleX = document.getElementById("scalex");
+	let scaleY = document.getElementById("scaley");
+	let scaleZ = document.getElementById("scalez");
+	let translateX = document.getElementById("translationx");
+	let translateY = document.getElementById("translationy");
+	let translateZ = document.getElementById("translationz");
+	let hex = document.getElementById("color");
+	let objnum = document.getElementById("objnum");
+}
+
+// transform the selected cylinder using user input
 function transformObj() {
 	// grab all of the inputs
 	let rotateX = document.getElementById("rotationx").value;
@@ -231,12 +264,8 @@ function transformObj() {
 	let translateX = document.getElementById("translationx").value;
 	let translateY = document.getElementById("translationy").value;
 	let translateZ = document.getElementById("translationz").value;
-	//let objnum = document.getElementById("objnum").value;
-	let objnum = 0;
-
 	let hex = document.getElementById("color").value;
-	let color = hexToRGB(hex);
-	console.log(color);
+	let objnum = document.getElementById("objnum").value;
 
 	// create transformation matrix
 	let modelMatrix = new Matrix4();
@@ -245,11 +274,15 @@ function transformObj() {
 	modelMatrix.rotate(rotateZ, 0, 0, 1);
 	modelMatrix.scale(scaleX / 20, scaleY / 20, scaleZ / 20);
 	modelMatrix.translate(translateX / 100, translateY / 100, translateZ / 100);
+
+	// convert from hex to rgb
+	let color = hexToRGB(hex);
 	
-	// apply matrix
+	// apply matrix/color
 	Objects[objnum].modelMatrix = modelMatrix;
 	Objects[objnum].color = color;
 
+	// redraw
 	drawAll();
 }
 
