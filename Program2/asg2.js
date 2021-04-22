@@ -229,8 +229,9 @@ function removeCylinder() {
 	let objnum = document.getElementById("objnum");
 	if (objnum.value == Objects.length - 1) {
 		objnum.value = Objects.length - 2;
-		objnum.click();
 	}
+	changeSelectedObj();
+
 	objnum.remove(Objects.length - 1);
 
 
