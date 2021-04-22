@@ -177,7 +177,7 @@ function draw(obj) {
 
 	// set fragment shader color
 	//defineFragColor(obj.color);
-	defineFragColor([1.0, 0.0, 0.0]);
+	defineFragColor(obj.color);
 	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
 	gl.uniformMatrix4fv(u_Model, false, obj.modelMatrix.elements);
 	
@@ -234,6 +234,10 @@ function transformObj() {
 	//let objnum = document.getElementById("objnum").value;
 	let objnum = 0;
 
+	let hex = document.getElementById("color").value;
+	let color = hexToRGB(hex);
+	console.log(color);
+
 	// create transformation matrix
 	let modelMatrix = new Matrix4();
 	modelMatrix.rotate(rotateX, 1, 0, 0);
@@ -244,8 +248,47 @@ function transformObj() {
 	
 	// apply matrix
 	Objects[objnum].modelMatrix = modelMatrix;
+	Objects[objnum].color = color;
 
 	drawAll();
+}
+
+// converts #RRGGBB into [r, g, b]
+// for 0.0 <= r,g,b <= 1.0
+function hexToRGB(hex) {
+	result = [0, 0, 0]; // [r, g, b]
+	nums = []; // numbers of the hex chars in order #RRGGBB
+
+	for (let i = 0; i < 6; i++) {
+		switch (hex[i+1]) {
+			case "a":
+				nums[i] = 10;
+				break;
+			case "b":
+				nums[i] = 11;
+				break;
+			case "c":
+				nums[i] = 12;
+				break;
+			case "d":
+				nums[i] = 13;
+				break;
+			case "e":
+				nums[i] = 14;
+				break;
+			case "f":
+				nums[i] = 15;
+				break;
+			default:
+				nums[i] = parseInt(hex[i+1]);
+		}
+	}
+	
+	result[0] = (nums[0] * 16 + nums[1]) / 255;
+	result[1] = (nums[2] * 16 + nums[3]) / 255;
+	result[2] = (nums[4] * 16 + nums[5]) / 255;
+
+	return result
 }
 
 // save .coor and .poly files for the given vertices and polygons
