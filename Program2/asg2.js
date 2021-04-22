@@ -217,7 +217,7 @@ function createCylinderFromInput() {
 	Objects.push(cylinder);
 	console.log(cylinder);
 
-	drawAll();
+	transformObj();
 }
 
 function transformObj() {
