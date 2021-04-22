@@ -214,10 +214,10 @@ function createCylinderFromInput() {
 	newCyl.text = Objects.length.toString();
 	newCyl.value = Objects.length;
 	cylinders.add(newCyl);
+	cylinders.value = Objects.length;
 
 	cylinder = new Cylinder(n, endcaps, color, modelMatrix);
 	Objects.push(cylinder);
-	console.log(cylinder);
 
 	transformObj();
 }
@@ -227,7 +227,12 @@ function removeCylinder() {
 	// remove last option from the selection input
 	// later we refactor the array to match with the remaining nums
 	let objnum = document.getElementById("objnum");
+	if (objnum.value == Objects.length - 1) {
+		objnum.value = Objects.length - 2;
+		objnum.click();
+	}
 	objnum.remove(Objects.length - 1);
+
 
 	// remove cylinder from Objects array
 	Objects.splice(objnum.value, 1);
@@ -237,19 +242,21 @@ function removeCylinder() {
 }
 
 // load the selected cylinder's attributes into the user input
-// UNIMPLEMENTED
 function changeSelectedObj() {
-	let rotateX = document.getElementById("rotationx");
-	let rotateY = document.getElementById("rotationy");
-	let rotateZ = document.getElementById("rotationz");
-	let scaleX = document.getElementById("scalex");
-	let scaleY = document.getElementById("scaley");
-	let scaleZ = document.getElementById("scalez");
-	let translateX = document.getElementById("translationx");
-	let translateY = document.getElementById("translationy");
-	let translateZ = document.getElementById("translationz");
-	let hex = document.getElementById("color");
-	let objnum = document.getElementById("objnum");
+	// get the relevant object's number in the Objects array
+	let objnum = document.getElementById("objnum").value;
+
+	// pull values from the cylinder object
+	document.getElementById("rotationx").value = Objects[objnum].transformations[0];
+	document.getElementById("rotationy").value = Objects[objnum].transformations[1];
+	document.getElementById("rotationz").value = Objects[objnum].transformations[2];
+	document.getElementById("scalex").value = Objects[objnum].transformations[3];
+	document.getElementById("scaley").value = Objects[objnum].transformations[4];
+	document.getElementById("scalez").value = Objects[objnum].transformations[5];
+	document.getElementById("translationx").value = Objects[objnum].transformations[6];
+	document.getElementById("translationy").value = Objects[objnum].transformations[7];
+	document.getElementById("translationz").value = Objects[objnum].transformations[8];
+	document.getElementById("color").value = Objects[objnum].colorHex;
 }
 
 // transform the selected cylinder using user input
@@ -280,6 +287,12 @@ function transformObj() {
 	
 	// apply matrix/color
 	Objects[objnum].modelMatrix = modelMatrix;
+	Objects[objnum].transformations = [ //for loading later
+		rotateX, rotateY, rotateZ,
+		scaleX, scaleY, scaleZ,
+		translateX, translateY, translateZ
+	]
+	Objects[objnum].colorHex = hex;
 	Objects[objnum].color = color;
 
 	// redraw

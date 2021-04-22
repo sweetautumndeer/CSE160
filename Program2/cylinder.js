@@ -3,8 +3,10 @@ class Cylinder {
 	vertices;
 	polygons;
 	normals;
+	colorHex;
 	color;
 	modelMatrix;
+	transformations;
 
 	constructor(n, endcaps, color, modelMatrix) {
 		this.color = color;
