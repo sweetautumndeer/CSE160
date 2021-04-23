@@ -13,7 +13,8 @@ var VSHADER = `
 
 	attribute vec3 a_Position; // (x,y,z)
 	attribute vec3 a_Normal;
-
+	
+	uniform float u_FlatShading; // bool for whether to render flat shading
 	uniform mat4 u_Model;
 	uniform vec3 u_LightColor;
 	uniform vec3 u_LightDirection;
@@ -22,32 +23,23 @@ var VSHADER = `
 	varying vec4 v_Color;
 
 	void main() {
-		vec3 normal = (u_Model * vec4(a_Normal, 1.0)).xyz;
-		normal = normalize(normal);
+		if (u_FlatShading == 1.0) {
+			// compute diffuse for flat shading
+			vec3 normal = (u_Model * vec4(a_Normal, 1.0)).xyz;
+			normal = normalize(normal);
 
-		vec3 lightDir = normalize(u_LightDirection);
+			vec3 lightDir = normalize(u_LightDirection);
 
-        float nDotL = max(dot(normal, lightDir), 0.0);
-        vec3 diffuse = u_LightColor * u_Color * nDotL;
+        	float nDotL = max(dot(normal, lightDir), 0.0);
+        	vec3 diffuse = u_LightColor * u_Color * nDotL;
 
-        v_Color = vec4(diffuse, 1.0);
+        	//v_Color = vec4(diffuse, 1.0);
+			v_Color = vec4(1.0, 0.0, 0.0, 1.0);
+		} else if (u_FlatShading == 0.0) {
+			// wireframe without shading
+			v_Color = vec4(u_Color, 1.0); 
+		}
 
-		gl_Position = u_Model * vec4(a_Position, 1.0);
-	}
-`;
-
-var WIREFRAMEVSHADER = `
-	precision mediump float;
-
-	attribute vec3 a_Position;
-
-	uniform mat4 u_Model;
-	uniform vec3 u_Color
-
-	varying vec4 v_Color;
-
-	void main() {
-		v_Color = vec4(u_Color, 1.0);
 		gl_Position = u_Model * vec4(a_Position, 1.0);
 	}
 `;
@@ -82,7 +74,7 @@ let normals = [];
 let polygons = [];
 
 let light = null;
-let drawMode = null;
+let drawMode = "Solid";
 
 //javascript main()
 function main() {
@@ -311,6 +303,9 @@ function drawPowerLines() {
 
 function drawAll() {
 	gl.clear(gl.COLOR_BUFFER_BIT);
+	drawMode = document.getElementById("mode").value;
+	console.log(drawMode);
+	
 	for (let obj of Objects) {
 		draw(obj);
 	}
@@ -374,10 +369,15 @@ function draw(obj) {
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
 	//gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
+	console.log(drawMode);
+	console.log(obj);
+	let u_FlatShading = gl.getUniformLocation(gl.program, "u_FlatShading");
 	if (drawMode == "WireFrame") {
 		gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
-	} else {
+		gl.uniform1f(u_FlatShading, 0.0); // pass false to the vshader
+	} else if (drawMode == "Solid") {
 		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+		gl.uniform1f(u_FlatShading, 1.0); // pass true to the vshader
 	}
 }
 
