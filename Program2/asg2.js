@@ -22,23 +22,27 @@ var VSHADER = `
 
 	varying vec4 v_Color;
 
+	// compute diffuse for flat shading
+	void flatShading() {
+		vec3 normal = (u_Model * vec4(a_Normal, 1.0)).xyz;
+		normal = normalize(normal);
+
+		vec3 lightDir = normalize(u_LightDirection);
+
+        float nDotL = max(dot(normal, lightDir), 0.0);
+        vec3 diffuse = u_LightColor * u_Color * nDotL;
+
+        v_Color = vec4(diffuse, 1.0);
+	}
+
+	// wireframe without shading
+	void wireFrame() {
+		v_Color = vec4(u_Color, 1.0);
+	}
+
 	void main() {
-		if (u_FlatShading == 1.0) {
-			// compute diffuse for flat shading
-			vec3 normal = (u_Model * vec4(a_Normal, 1.0)).xyz;
-			normal = normalize(normal);
-
-			vec3 lightDir = normalize(u_LightDirection);
-
-        	float nDotL = max(dot(normal, lightDir), 0.0);
-        	vec3 diffuse = u_LightColor * u_Color * nDotL;
-
-        	//v_Color = vec4(diffuse, 1.0);
-			v_Color = vec4(1.0, 0.0, 0.0, 1.0);
-		} else if (u_FlatShading == 0.0) {
-			// wireframe without shading
-			v_Color = vec4(u_Color, 1.0); 
-		}
+		if (u_FlatShading == 1.0) {	flatShading(); } 
+		else if (u_FlatShading == 0.0) { wireFrame(); }
 
 		gl_Position = u_Model * vec4(a_Position, 1.0);
 	}
@@ -74,7 +78,7 @@ let normals = [];
 let polygons = [];
 
 let light = null;
-let drawMode = "Solid";
+let drawMode = null;
 
 //javascript main()
 function main() {
@@ -137,11 +141,11 @@ function drawPowerLines() {
 		cylinders.value = Objects.length;
 	}
 
-	
+
 
 	// create cylinders
 	n = 10;
-	color = [92/255, 64/255, 51/255];
+	color = [92 / 255, 64 / 255, 51 / 255];
 	modelMatrix = new Matrix4();
 	modelMatrix.rotate(90, 1, 0, 0);
 	modelMatrix.rotate(0, 0, 1, 0);
@@ -153,7 +157,7 @@ function drawPowerLines() {
 
 
 	n = 10;
-	color = [92/255, 64/255, 51/255];
+	color = [92 / 255, 64 / 255, 51 / 255];
 	modelMatrix = new Matrix4();
 	modelMatrix.rotate(0, 1, 0, 0);
 	modelMatrix.rotate(90, 0, 1, 0);
@@ -164,7 +168,7 @@ function drawPowerLines() {
 	cylinder2.colorHex = "#5c4033";
 
 	n = 10;
-	color = [92/255, 64/255, 51/255];
+	color = [92 / 255, 64 / 255, 51 / 255];
 	modelMatrix = new Matrix4();
 	modelMatrix.rotate(0, 1, 0, 0);
 	modelMatrix.rotate(90, 0, 1, 0);
@@ -278,7 +282,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(0, 1, 0, 0);
 	modelMatrix.rotate(0, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);	
+	modelMatrix.scale(0.025, 0.025, 1);
 	modelMatrix.translate(0, 0, 0);
 	let cylinder12 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder12.colorHex = "#404040";
@@ -305,7 +309,7 @@ function drawAll() {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	drawMode = document.getElementById("mode").value;
 	console.log(drawMode);
-	
+
 	for (let obj of Objects) {
 		draw(obj);
 	}
@@ -314,8 +318,8 @@ function drawAll() {
 // change the Fragment Shader's color
 // color = [r, g, b]
 function defineFragColor(color) {
-    // get u_Color variable from fragment shader
-    let u_Color = gl.getUniformLocation(gl.program, "u_Color");
+	// get u_Color variable from fragment shader
+	let u_Color = gl.getUniformLocation(gl.program, "u_Color");
 	// set u_Color
 	gl.uniform3f(u_Color, color[0], color[1], color[2]);
 }
@@ -356,7 +360,7 @@ function draw(obj) {
 	defineFragColor(obj.color);
 	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
 	gl.uniformMatrix4fv(u_Model, false, obj.modelMatrix.elements);
-	
+
 	let vertexBuffer = initBuffer("a_Position", 3);
 	let normalBuffer = initBuffer("a_Normal", 3);
 
@@ -373,11 +377,11 @@ function draw(obj) {
 	console.log(obj);
 	let u_FlatShading = gl.getUniformLocation(gl.program, "u_FlatShading");
 	if (drawMode == "WireFrame") {
-		gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
 		gl.uniform1f(u_FlatShading, 0.0); // pass false to the vshader
+		gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
 	} else if (drawMode == "Solid") {
-		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 		gl.uniform1f(u_FlatShading, 1.0); // pass true to the vshader
+		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 	}
 }
 
@@ -467,7 +471,7 @@ function transformObj() {
 
 	// convert from hex to rgb
 	let color = hexToRGB(hex);
-	
+
 	// apply matrix/color
 	Objects[objnum].modelMatrix = modelMatrix;
 	Objects[objnum].transformations = [ //for loading later
@@ -489,7 +493,7 @@ function hexToRGB(hex) {
 	nums = []; // numbers of the hex chars in order #RRGGBB
 
 	for (let i = 0; i < 6; i++) {
-		switch (hex[i+1]) {
+		switch (hex[i + 1]) {
 			case "a":
 				nums[i] = 10;
 				break;
@@ -509,10 +513,10 @@ function hexToRGB(hex) {
 				nums[i] = 15;
 				break;
 			default:
-				nums[i] = parseInt(hex[i+1]);
+				nums[i] = parseInt(hex[i + 1]);
 		}
 	}
-	
+
 	result[0] = (nums[0] * 16 + nums[1]) / 255;
 	result[1] = (nums[2] * 16 + nums[3]) / 255;
 	result[2] = (nums[4] * 16 + nums[5]) / 255;
@@ -529,7 +533,7 @@ function saveObj() {
 	let coorData = "#" + filenameCoor + "\n"
 	coorData += objVertices.length + "\n"
 	for (i = 0; i < objVertices.length; i++) {
-		coorData += (i+1) + ", " + objVertices[i][0] + ", " + objVertices[i][1] + ", " + objVertices[i][2] + "\n";
+		coorData += (i + 1) + ", " + objVertices[i][0] + ", " + objVertices[i][1] + ", " + objVertices[i][2] + "\n";
 	}
 
 	//console.log(coorData);
@@ -549,7 +553,7 @@ function saveObj() {
 	let polyData = "#" + filenamePoly + "\n"
 	polyData += objPolygons.length + "\n"
 	for (i = 0; i < objPolygons.length; i++) {
-		polyData += "tri" + (i+1) + " " + objPolygons[i][0] + " " + objPolygons[i][1] + " " + objPolygons[i][2] + "\n";
+		polyData += "tri" + (i + 1) + " " + objPolygons[i][0] + " " + objPolygons[i][1] + " " + objPolygons[i][2] + "\n";
 	}
 
 	//console.log(polyData);
