@@ -114,7 +114,7 @@ function main() {
 	light = new Vector3([1.0, 1.0, 1.0]);
 
 	defineParameters();
-	
+	drawPowerLines();
 }
 
 function defineParameters() {
@@ -122,9 +122,191 @@ function defineParameters() {
 	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
 	let u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
 
-	gl.uniform3f(u_LightDirection, 1.0, 0.0, -2.0);
+	gl.uniform3f(u_LightDirection, 1.0, 1.0, -1.0);
 	gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
 
+}
+
+// draw my custom model
+function drawPowerLines() {
+	// define cylinder inputs
+	let n;
+	let endcaps = "True";
+	let color;
+	let modelMatrix;
+
+	// create selection options in ui
+	let cylinders = document.getElementById("objnum");
+	for (let i = 0; i < 12; i++) {
+		let newCyl = document.createElement("option");
+		newCyl.text = i.toString();
+		newCyl.value = i;
+		cylinders.add(newCyl);
+		cylinders.value = Objects.length;
+	}
+
+	
+
+	// create cylinders
+	n = 10;
+	color = [92/255, 64/255, 51/255];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(90, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.1, 0.1, 1.5);
+	modelMatrix.translate(0, 0, 0);
+	let cylinder1 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder1.colorHex = "#5c4033"
+
+
+	n = 10;
+	color = [92/255, 64/255, 51/255];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(90, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.05, 0.05, 1);
+	modelMatrix.translate(0, 13, 0);
+	let cylinder2 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder2.colorHex = "#5c4033";
+
+	n = 10;
+	color = [92/255, 64/255, 51/255];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(90, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.05, 0.05, 1);
+	modelMatrix.translate(0, 8, 0);
+	let cylinder3 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder3.colorHex = "#5c4033";
+
+	n = 10;
+	color = [0.5, 0.5, 0.5];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(90, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.1, 0.1, 0.3);
+	modelMatrix.translate(2, 0.3, -0.5);
+	let cylinder4 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder4.colorHex = "#808080";
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 1);
+	modelMatrix.translate(0, 0, 0);
+	let cylinder5 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder5.colorHex = "#404040";
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 1);
+	modelMatrix.translate(0, 0, 0);
+	let cylinder6 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder6.colorHex = "#404040";
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 1);
+	modelMatrix.translate(0, 100, 0);
+	let cylinder7 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder7.colorHex = "#404040";
+	cylinder7.transformations = [
+		0, 0, 0,
+		0.025, 0.025, 1,
+		0, 100, 0
+	];
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 2);
+	modelMatrix.translate(0, 0, 0);
+	let cylinder8 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder8.colorHex = "#404040";
+	cylinder8.transformations = [
+		0, 0, 0,
+		0.025, 0.025, 1,
+		0, 100, 0
+	];
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 1);
+	modelMatrix.translate(0, 0, 0);
+	let cylinder9 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder9.colorHex = "#404040";
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 1);
+	modelMatrix.translate(0, 0, 0);
+	let cylinder10 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder10.colorHex = "#404040";
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 1);
+	modelMatrix.translate(0, 0, 0);
+	let cylinder11 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder11.colorHex = "#404040";
+
+	n = 10;
+	color = [0.25, 0.25, 0.25];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.025, 0.025, 1);	
+	modelMatrix.translate(0, 0, 0);
+	let cylinder12 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder12.colorHex = "#404040";
+
+	// add cylinders to the Objects array for drawing
+	Objects.push(cylinder1);
+	Objects.push(cylinder2);
+	Objects.push(cylinder3);
+	Objects.push(cylinder4);
+	Objects.push(cylinder5);
+	Objects.push(cylinder6);
+	Objects.push(cylinder7);
+	Objects.push(cylinder8);
+	Objects.push(cylinder9);
+	Objects.push(cylinder10);
+	Objects.push(cylinder11);
+	Objects.push(cylinder12);
+
+	// draw
+	drawAll();
 }
 
 function drawAll() {

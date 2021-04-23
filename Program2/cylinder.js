@@ -6,7 +6,11 @@ class Cylinder {
 	colorHex;
 	color;
 	modelMatrix;
-	transformations;
+	transformations = [
+		0, 0, 0,
+		1, 1, 1,
+		0, 0, 0
+	];
 
 	constructor(n, endcaps, color, modelMatrix) {
 		this.color = color;
