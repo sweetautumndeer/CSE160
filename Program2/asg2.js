@@ -115,7 +115,7 @@ function defineLightParameters() {
 	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
 	let u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
 
-	gl.uniform3f(u_LightDirection, 1.0, 1.0, -1.0);
+	gl.uniform3f(u_LightDirection, 1.0, 1.0, 1.0);
 	gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
 
 }
@@ -150,7 +150,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(0, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.1, 0.1, 1.5);
-	modelMatrix.translate(0, 0, 0);
+	modelMatrix.translate(0, 1, 0);
 	let cylinder1 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder1.colorHex = "#5c4033"
 	cylinder1.transformations = [
@@ -167,7 +167,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(90, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.05, 0.05, 1);
-	modelMatrix.translate(0, 13, 0);
+	modelMatrix.translate(2, 13, 0);
 	let cylinder2 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder2.colorHex = "#5c4033";
 	cylinder2.transformations = [
@@ -183,7 +183,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(90, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.05, 0.05, 1);
-	modelMatrix.translate(0, 8, 0);
+	modelMatrix.translate(2, 8, 0);
 	let cylinder3 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder3.colorHex = "#5c4033";
 	cylinder3.transformations = [
@@ -199,7 +199,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(0, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.1, 0.1, 0.3);
-	modelMatrix.translate(2, 0.3, -0.5);
+	modelMatrix.translate(2, -0.5, -0.5);
 	let cylinder4 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder4.colorHex = "#808080";
 	cylinder4.transformations = [
