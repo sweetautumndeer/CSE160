@@ -1,15 +1,27 @@
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Autumn Moulios ~ 4/25/2021 ~ CSE 160
+// amoulios
+// 
+// Assignment 2
+// 3D World
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class Cylinder {
 
 	vertices;
 	polygons;
 	normals;
-	colorHex;
 	color;
 	modelMatrix;
+
+	//hex version of the color for loading data into the ui
+	colorHex;
+	// save transformation inputs outsie of matrix
+	// used for loading
 	transformations = [
-		0, 0, 0,
-		1, 1, 1,
-		0, 0, 0
+		0, 0, 0, // rotateX, rotateY, rotateZ
+		1, 1, 1, // scaleX, scaleY, scaleZ
+		0, 0, 0 // translateX, translateY, translateZ
 	];
 
 	constructor(n, endcaps, color, modelMatrix) {
@@ -105,9 +117,5 @@ class Cylinder {
 			//polygons.push(3*i);
 		}
 
-	}
-
-	get vertices() {
-		return this.vertices;
 	}
 }

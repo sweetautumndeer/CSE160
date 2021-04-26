@@ -3,7 +3,7 @@
 // amoulios
 // 
 // Assignment 2
-// Drawing a Cylinder
+// 3D World
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Shaders (GLSL)
@@ -47,8 +47,6 @@ var VSHADER = `
 		gl_Position = u_Model * vec4(a_Position, 1.0);
 	}
 `;
-
-// gl_Position = u_Scaling * u_Rotation * vec4(a_Position, 1.0) + vec4(u_Translation, 1.0);
 
 // Fragment Shader
 // Takes "pixels" rather than vertices and assigns colors
@@ -107,13 +105,12 @@ function main() {
 		return false;
 	}
 
-	light = new Vector3([1.0, 1.0, 1.0]);
-
-	defineParameters();
-	drawPowerLines();
+	defineLightParameters();
+	drawPowerLines(); // draw my custom model
 }
 
-function defineParameters() {
+// set light direction/color
+function defineLightParameters() {
 	// grab variables from shaders
 	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
 	let u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
@@ -130,10 +127,12 @@ function drawPowerLines() {
 	let endcaps = "True";
 	let color;
 	let modelMatrix;
+	let scaleCoefficient = 20;
+	let translateCoefficient = 100;
 
 	// create selection options in ui
 	let cylinders = document.getElementById("objnum");
-	for (let i = 0; i < 12; i++) {
+	for (let i = 0; i < 4; i++) {
 		let newCyl = document.createElement("option");
 		newCyl.text = i.toString();
 		newCyl.value = i;
@@ -154,6 +153,11 @@ function drawPowerLines() {
 	modelMatrix.translate(0, 0, 0);
 	let cylinder1 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder1.colorHex = "#5c4033"
+	cylinder1.transformations = [
+		90, 0, 0, //rotateX, rotateY, rotateZ
+		0.1 * scaleCoefficient, 0.1 * scaleCoefficient, 1.5 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		0, 0, 0 // translateX, translateY, translateZ
+	];
 
 
 	n = 10;
@@ -166,6 +170,11 @@ function drawPowerLines() {
 	modelMatrix.translate(0, 13, 0);
 	let cylinder2 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder2.colorHex = "#5c4033";
+	cylinder2.transformations = [
+		0, 90, 0, //rotateX, rotateY, rotateZ
+		0.05 * scaleCoefficient, 0.05 * scaleCoefficient, 1 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		0, 13 * translateCoefficient, 0 // translateX, translateY, translateZ
+	];
 
 	n = 10;
 	color = [92 / 255, 64 / 255, 51 / 255];
@@ -177,6 +186,11 @@ function drawPowerLines() {
 	modelMatrix.translate(0, 8, 0);
 	let cylinder3 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder3.colorHex = "#5c4033";
+	cylinder3.transformations = [
+		0, 90, 0, //rotateX, rotateY, rotateZ
+		0.05 * scaleCoefficient, 0.05 * scaleCoefficient, 1 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		0, 8 * translateCoefficient, 0 // translateX, translateY, translateZ
+	];
 
 	n = 10;
 	color = [0.5, 0.5, 0.5];
@@ -188,127 +202,28 @@ function drawPowerLines() {
 	modelMatrix.translate(2, 0.3, -0.5);
 	let cylinder4 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder4.colorHex = "#808080";
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);
-	modelMatrix.translate(0, 0, 0);
-	let cylinder5 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder5.colorHex = "#404040";
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);
-	modelMatrix.translate(0, 0, 0);
-	let cylinder6 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder6.colorHex = "#404040";
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);
-	modelMatrix.translate(0, 100, 0);
-	let cylinder7 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder7.colorHex = "#404040";
-	cylinder7.transformations = [
-		0, 0, 0,
-		0.025, 0.025, 1,
-		0, 100, 0
+	cylinder4.transformations = [
+		90, 0, 0, //rotateX, rotateY, rotateZ
+		0.1 * scaleCoefficient, 0.1 * scaleCoefficient, 0.3 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		2 * translateCoefficient, 0.3 * translateCoefficient, -0.5 * translateCoefficient // translateX, translateY, translateZ
 	];
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 2);
-	modelMatrix.translate(0, 0, 0);
-	let cylinder8 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder8.colorHex = "#404040";
-	cylinder8.transformations = [
-		0, 0, 0,
-		0.025, 0.025, 1,
-		0, 100, 0
-	];
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);
-	modelMatrix.translate(0, 0, 0);
-	let cylinder9 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder9.colorHex = "#404040";
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);
-	modelMatrix.translate(0, 0, 0);
-	let cylinder10 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder10.colorHex = "#404040";
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);
-	modelMatrix.translate(0, 0, 0);
-	let cylinder11 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder11.colorHex = "#404040";
-
-	n = 10;
-	color = [0.25, 0.25, 0.25];
-	modelMatrix = new Matrix4();
-	modelMatrix.rotate(0, 1, 0, 0);
-	modelMatrix.rotate(0, 0, 1, 0);
-	modelMatrix.rotate(0, 0, 0, 1);
-	modelMatrix.scale(0.025, 0.025, 1);
-	modelMatrix.translate(0, 0, 0);
-	let cylinder12 = new Cylinder(n, endcaps, color, modelMatrix);
-	cylinder12.colorHex = "#404040";
 
 	// add cylinders to the Objects array for drawing
 	Objects.push(cylinder1);
 	Objects.push(cylinder2);
 	Objects.push(cylinder3);
 	Objects.push(cylinder4);
-	Objects.push(cylinder5);
-	Objects.push(cylinder6);
-	Objects.push(cylinder7);
-	Objects.push(cylinder8);
-	Objects.push(cylinder9);
-	Objects.push(cylinder10);
-	Objects.push(cylinder11);
-	Objects.push(cylinder12);
 
 	// draw
 	drawAll();
 }
 
+// loop through the Objects array and draw each
 function drawAll() {
+	// clear screen
 	gl.clear(gl.COLOR_BUFFER_BIT);
+	// set global drawmode variable
 	drawMode = document.getElementById("mode").value;
-	console.log(drawMode);
 
 	for (let obj of Objects) {
 		draw(obj);
@@ -324,6 +239,8 @@ function defineFragColor(color) {
 	gl.uniform3f(u_Color, color[0], color[1], color[2]);
 }
 
+// initialize a standard array buffer
+// return the created buffer
 function initBuffer(attributeName, num) {
 	let shaderBuffer = gl.createBuffer();
 	if (!shaderBuffer) {
@@ -340,7 +257,7 @@ function initBuffer(attributeName, num) {
 	return shaderBuffer;
 }
 
-// draw a triangle from 3 points using WebGL
+// draw an object using WebGL
 function draw(obj) {
 	// create triangle in cpu memory
 	let vertices = new Float32Array(obj.vertices);
@@ -356,11 +273,11 @@ function draw(obj) {
 	}
 
 	// set fragment shader color
-	//defineFragColor(obj.color);
 	defineFragColor(obj.color);
 	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
 	gl.uniformMatrix4fv(u_Model, false, obj.modelMatrix.elements);
 
+	// init array buffers
 	let vertexBuffer = initBuffer("a_Position", 3);
 	let normalBuffer = initBuffer("a_Normal", 3);
 
@@ -372,9 +289,6 @@ function draw(obj) {
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-	//gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
-	console.log(drawMode);
-	console.log(obj);
 	let u_FlatShading = gl.getUniformLocation(gl.program, "u_FlatShading");
 	if (drawMode == "WireFrame") {
 		gl.uniform1f(u_FlatShading, 0.0); // pass false to the vshader
@@ -392,19 +306,23 @@ function createCylinderFromInput() {
 	let endcaps = document.getElementById("endcaps").value;
 	drawMode = document.getElementById("mode").value;
 
-	//createUnitCylinder(n, endcaps);
-	//Objects = [];
+	// create identity matrix
 	let modelMatrix = new Matrix4();
+	// grab the cylinders selection dropdown menu
 	let cylinders = document.getElementById("objnum");
+	// create a new entry for the menu
 	let newCyl = document.createElement("option");
 	newCyl.text = Objects.length.toString();
 	newCyl.value = Objects.length;
+	// add the new entry and switch to it
 	cylinders.add(newCyl);
 	cylinders.value = Objects.length;
 
+	// create new cylinder object and push it into the Objects array
 	cylinder = new Cylinder(n, endcaps, color, modelMatrix);
 	Objects.push(cylinder);
 
+	// apply the user input transformations to the new cylinder
 	transformObj();
 }
 
@@ -428,7 +346,7 @@ function removeCylinder() {
 	drawAll();
 }
 
-// load the selected cylinder's attributes into the user input
+// load the selected cylinder's attributes/transformations into the user input
 function changeSelectedObj() {
 	// get the relevant object's number in the Objects array
 	let objnum = document.getElementById("objnum").value;
@@ -525,6 +443,7 @@ function hexToRGB(hex) {
 }
 
 // save .coor and .poly files for the given vertices and polygons
+// currently only works for one cylinder without transformations
 function saveObj() {
 	let filenameCoor = "cylinder" + n + ".coor";
 	let filenamePoly = "cylinder" + n + ".poly";
