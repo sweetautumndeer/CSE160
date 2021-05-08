@@ -1,0 +1,101 @@
+﻿<!--
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Autumn Moulios ~ 4/25/2021 ~ CSE 160
+// amoulios
+// 
+// Assignment 3
+// Smooth Lighting
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Program 1: Draw a Unit Cylinder</title>
+	</head>
+	
+	<body onload="main()">
+	  <canvas id="cvs1" width="400" height="400">
+	  Please use a browser that supports "canvas"
+	  </canvas>
+
+	  </br>	
+	  <!-- Take input for the number of sides to the circle (n) and whether to draw the endcaps-->
+	  Number of Sides: <input value="10" id="n" type="number"></input>
+	  </br>
+	  Draw Endcaps: <select id="endcaps">
+						<option value="True">True</option>
+						<option value="False">False</option>
+	                </select>
+	  <!-- <input value="endcaps" id="endcaps" type="checkbox"></input> -->
+	  </br>
+	  Draw Mode: <select id="mode" oninput="drawAll()">
+		                <option value="WireFrame">WireFrame</option>
+						<option value="Solid">Flat Shading</option>
+						<option selected="selected" value="Gouraud">Gouraud Shading</option>
+						<option value="Phong">Phong Shading</option>
+	             </select>
+	  </br>
+	  Directional Lighting: <label class="switch">
+		  <input type="checkbox" id="DirLighting" oninput="defineLightParameters()">
+		  <span class="slider round"></span>
+	  </label>
+	  Point Lighting: <label class="switch">
+		<input checked="true" type="checkbox" id="PointLighting" oninput="defineLightParameters()">
+		<span class="slider round"></span>
+	  </label> 
+	  </br>
+	  Point Light Position: 
+	  X: <input value="0.5" id="px" type="number" oninput="defineLightParameters()"></input> 
+	  Y: <input value="0.5" id="py" type="number" oninput="defineLightParameters()"></input> 
+	  Z: <input value="-0.5" id="pz" type="number" oninput="defineLightParameters()"></input>
+	  </br>
+	  Ambient: <label class="switch">
+		<input checked="true" type="checkbox" value="ambient" name="LightingEffects" id="AmbientLighting" oninput="defineLightParameters()">
+		<span class="slider round"></span>
+	  </label>
+	  Diffuse: <label class="switch">
+		<input checked="true" type="checkbox" value="diffuse" name="LightingEffects" id="DiffuseLighting" oninput="defineLightParameters()">
+		<span class="slider round"></span>
+	  </label>
+	  Specular: <label class="switch">
+		<input checked="true" type="checkbox" value="specular" name="LightingEffects" id="SpecularLighting" oninput="defineLightParameters()">
+		<span class="slider round"></span>
+	  </label> 
+	  </br>
+	  Cylinder: <select id="objnum" oninput="changeSelectedObj()"></select></br>
+	  Color: <input value="#FF0000" id="color" type="color" oninput="transformObj()"></input></br>
+	  Rotation: X:<input value="0" id="rotationx" type="range" min="-360" max="360" class="slider" oninput="transformObj()"></input>
+	  Y:<input value="0" id="rotationy" type="range" min="-360" max="360" class="slider" oninput="transformObj()"></input>
+	  Z:<input value="0" id="rotationz" type="range" min="-360" max="360" class="slider" oninput="transformObj()"></input>
+	  </br>
+	  Scale: X:<input value="1" id="scalex" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
+	  Y:<input value="1" id="scaley" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
+	  Z:<input value="1" id="scalez" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
+	  </br>
+	  Translation: X:<input value="0" id="translationx" type="range" min="-2000" max="2000" class="slider" oninput="transformObj()"></input>
+	  Y:<input value="0" id="translationy" type="range" min="-2000" max="2000" class="slider" oninput="transformObj()"></input>
+	  Z:<input value="0" id="translationz" type="range" min="-2000" max="2000" class="slider" oninput="transformObj()"></input>
+
+	  <!-- Button input to draw -->
+	  </br>
+	  <input value="Create Cylinder" type="button" onclick="createCylinderFromInput()"></input></br>
+	  <input value="Delete Cylinder" type="button" onclick="removeCylinder()"></input>
+
+	  <!-- Button input to save -->
+	  <!--</br>
+	  <input value="Save" type="button" onclick="saveObj()"></input> -->
+
+	  <!-- load main -->
+	  <script src="asg3.js"></script>
+	  <script src="cylinder.js"></script>
+	  <script src="sphere.js"></script>
+
+	  <!-- load external libraries -->
+	  <script src="../lib/cuon-matrix-cse160.js"></script>
+	  <script src="../lib/cuon-utils.js"></script>
+	  <script src="../lib/webgl-debug.js"></script>
+	  <script src="../lib/webgl-utils.js"></script>
+	</body>
+</html>
