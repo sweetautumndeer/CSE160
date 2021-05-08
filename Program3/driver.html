@@ -46,6 +46,11 @@
 		<span class="slider round"></span>
 	  </label> 
 	  </br>
+	  Directional Light Vector: 
+	  X: <input value="-1" id="dx" type="number" oninput="defineLightParameters()"></input> 
+	  Y: <input value="1" id="dy" type="number" oninput="defineLightParameters()"></input> 
+	  Z: <input value="-1" id="dz" type="number" oninput="defineLightParameters()"></input>
+	  </br>
 	  Point Light Position: 
 	  X: <input value="0.5" id="px" type="number" oninput="defineLightParameters()"></input> 
 	  Y: <input value="0.5" id="py" type="number" oninput="defineLightParameters()"></input> 
@@ -64,19 +69,19 @@
 		<span class="slider round"></span>
 	  </label> 
 	  </br>
-	  Cylinder: <select id="objnum" oninput="changeSelectedObj()"></select></br>
+	  Object: <select id="objnum" oninput="changeSelectedObj()"></select></br>
 	  Color: <input value="#FF0000" id="color" type="color" oninput="transformObj()"></input></br>
 	  Rotation: X:<input value="0" id="rotationx" type="range" min="-360" max="360" class="slider" oninput="transformObj()"></input>
 	  Y:<input value="0" id="rotationy" type="range" min="-360" max="360" class="slider" oninput="transformObj()"></input>
 	  Z:<input value="0" id="rotationz" type="range" min="-360" max="360" class="slider" oninput="transformObj()"></input>
 	  </br>
-	  Scale: X:<input value="1" id="scalex" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
-	  Y:<input value="1" id="scaley" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
-	  Z:<input value="1" id="scalez" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
+	  Scale: X:<input value="20" id="scalex" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
+	  Y:<input value="20" id="scaley" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
+	  Z:<input value="20" id="scalez" type="range" min="0" max="100" class="slider" oninput="transformObj()"></input>
 	  </br>
-	  Translation: X:<input value="0" id="translationx" type="range" min="-2000" max="2000" class="slider" oninput="transformObj()"></input>
-	  Y:<input value="0" id="translationy" type="range" min="-2000" max="2000" class="slider" oninput="transformObj()"></input>
-	  Z:<input value="0" id="translationz" type="range" min="-2000" max="2000" class="slider" oninput="transformObj()"></input>
+	  Translation: X:<input value="0" id="translationx" type="range" min="-1000" max="1000" class="slider" oninput="transformObj()"></input>
+	  Y:<input value="0" id="translationy" type="range" min="-1000" max="1000" class="slider" oninput="transformObj()"></input>
+	  Z:<input value="0" id="translationz" type="range" min="-1000" max="1000" class="slider" oninput="transformObj()"></input>
 
 	  <!-- Button input to draw -->
 	  </br>

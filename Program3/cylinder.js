@@ -8,9 +8,9 @@
 
 class Cylinder {
 
-	vertices;
+	verticesFlat;
 	verticesSmooth;
-	polygons;
+	polygonsFlat;
 	polygonsSmooth;
 
 	normalsFlat;
@@ -25,7 +25,7 @@ class Cylinder {
 	// used for loading
 	transformations = [
 		0, 0, 0, // rotateX, rotateY, rotateZ
-		1, 1, 1, // scaleX, scaleY, scaleZ
+		20, 20, 20, // scaleX, scaleY, scaleZ
 		0, 0, 0 // translateX, translateY, translateZ
 	];
 
@@ -80,9 +80,9 @@ class Cylinder {
 		}
 		
 		//reset arrays
-		this.vertices = [];
+		this.verticesFlat = [];
 		this.verticesSmooth = [];
-		this.polygons = [];
+		this.polygonsFlat = [];
 		this.polygonsSmooth = [];
 		this.normalsFlat = [];
 		this.normalsVertex = [];
@@ -104,23 +104,23 @@ class Cylinder {
 
 			// push into the final arrays (with repetition)
 			for (let j = 0; j < vertex1.elements.length; j++) {
-				this.vertices.push(vertex1.elements[j]);
+				this.verticesFlat.push(vertex1.elements[j]);
 			}
 			for (let j = 0; j < normal.elements.length; j++)
 				this.normalsFlat.push(normal.elements[j]);
-			this.polygons.push(3 * i);
+			this.polygonsFlat.push(3 * i);
 
 			for (let j = 0; j < vertex2.elements.length; j++)
-				this.vertices.push(vertex2.elements[j]);
+				this.verticesFlat.push(vertex2.elements[j]);
 			for (let j = 0; j < normal.elements.length; j++)
 				this.normalsFlat.push(normal.elements[j]);
-			this.polygons.push(3 * i + 1);
+			this.polygonsFlat.push(3 * i + 1);
 
 			for (let j = 0; j < vertex3.elements.length; j++)
-				this.vertices.push(vertex3.elements[j]);
+				this.verticesFlat.push(vertex3.elements[j]);
 			for (let j = 0; j < normal.elements.length; j++)
 				this.normalsFlat.push(normal.elements[j]);
-			this.polygons.push(3 * i + 2);
+			this.polygonsFlat.push(3 * i + 2);
 			//polygons.push(3*i);
 		}
 

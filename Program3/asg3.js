@@ -16,6 +16,10 @@ var VSHADER = `
 	attribute vec3 a_Normal;
 	uniform mat4 u_NormalMatrix;
 	uniform mat4 u_ModelMatrix;
+
+	// pass to frag shader for phong shading
+	varying vec3 v_Normal;
+    varying vec3 v_WorldPos;
 	
 	// "bools" to determine whether to draw certain effects
 	uniform float u_ShadingType; 
@@ -41,6 +45,11 @@ var VSHADER = `
 	
 	// Final Color
 	varying vec4 v_Color;
+
+	void phongPass() {
+		v_WorldPos = (u_ModelMatrix * vec4(a_Position, 1.0)).xyz;
+        v_Normal = normalize(u_NormalMatrix * vec4(a_Normal, 0.0)).xyz; // Normal
+	}
 
 	// ambient, diffuse, and specular
 	// either smooth or flat depending on the normals passed
@@ -89,7 +98,7 @@ var VSHADER = `
 		}
 
 		// Final Light Color
-		v_Color = vec4(ambient + diffuse + diffuseDir + specular + specularDir, 1.0);
+		v_Color = vec4(ambient + (diffuse + diffuseDir) + (specular + specularDir), 1.0);
 	}
 
 	// wireframe without shading
@@ -98,7 +107,8 @@ var VSHADER = `
 	}
 
 	void main() {
-		if (u_ShadingType == 2.0) { shading(); }
+		if (u_ShadingType == 3.0) { phongPass(); }
+		else if (u_ShadingType == 2.0) { shading(); }
 		else if (u_ShadingType == 1.0) { shading(); } 
 		else if (u_ShadingType == 0.0) { wireFrame(); }
 
@@ -110,14 +120,89 @@ var VSHADER = `
 // Takes "pixels" rather than vertices and assigns colors
 var FSHADER = `
 	precision mediump float;
+
+	varying vec3 v_Normal;
+    varying vec3 v_WorldPos;
+
+	// "bools" to determine whether to draw certain effects
+	uniform float u_ShadingType; 
+	uniform float u_DirectionalLightingOn;
+	uniform float u_PointLightingOn;
+	uniform float u_AmbientOn;
+	uniform float u_DiffuseOn;
+	uniform float u_SpecularOn;
+
+	// Light Colors
+	uniform vec3 u_DiffuseColor;
+	uniform vec3 u_AmbientColor;
+	uniform vec3 u_SpecularColor;
+	uniform float u_SpecularAlpha;
+
+	// Light Vectors
+	uniform vec3 u_LightDirection;
+	uniform vec3 u_LightPosition;
+	uniform vec3 u_EyePosition;
 	
+	// Object Color
 	uniform vec3 u_Color;
 
+	//Final Color
 	varying vec4 v_Color;
 
+	// ambient, diffuse, and specular
+	// either smooth or flat depending on the normals passed
+	vec4 phongShading() {
+		vec3 n = v_Normal;
+		vec3 l = normalize(u_LightPosition - v_WorldPos); //point
+		vec3 ld = normalize(u_LightDirection); //directional
+		vec3 v = normalize(u_EyePosition - v_WorldPos);
+		vec3 r = reflect(l, n); //reflected light
+		vec3 rd = reflect(ld, n);
+
+		// Ambient Light (independent of light)
+		vec3 ambient = vec3(0, 0, 0);
+		if (u_AmbientOn == 1.0)
+			ambient = u_AmbientColor * u_Color;
+
+		// Diffuse Light with Point Light
+		vec3 diffuse = vec3(0, 0, 0);
+		if (u_DiffuseOn == 1.0 && u_PointLightingOn == 1.0) {
+			float nDotL = max(dot(n, l), 0.0);
+			diffuse = u_DiffuseColor * u_Color * nDotL;
+		}
+
+		// Diffuse Light with Directional Light
+		vec3 diffuseDir = vec3(0, 0, 0);
+		if (u_DiffuseOn == 1.0 && u_DirectionalLightingOn == 1.0) {
+			float nDotLDirectional = max(dot(n, ld), 0.0);
+			diffuseDir = u_DiffuseColor * u_Color * nDotLDirectional;
+		}
+
+		// Specular Light
+		vec3 specular = vec3(0, 0, 0);
+		if (u_SpecularOn == 1.0 && u_PointLightingOn == 1.0) {
+			float rDotV = max(dot(r, v), 0.0);
+			float rDotVPowAlpha = pow(rDotV, u_SpecularAlpha);
+			specular = u_SpecularColor * u_Color * rDotVPowAlpha;
+		}
+
+		vec3 specularDir = vec3(0, 0, 0);
+		if (u_SpecularOn == 1.0 && u_DirectionalLightingOn == 1.0) {
+			float rDotV = max(dot(rd, v), 0.0);
+			float rDotVPowAlpha = pow(rDotV, u_SpecularAlpha);
+			specularDir = u_SpecularColor * u_Color * rDotVPowAlpha;
+		}
+
+		// Final Light Color
+		return vec4(ambient + (diffuse + diffuseDir) + (specular + specularDir), 1.0);
+	}
+
 	void main() {
-		
-		gl_FragColor = v_Color;
+		if (u_ShadingType == 3.0) { 
+			gl_FragColor = phongShading(); 
+		} else { 
+			gl_FragColor = v_Color;
+		}
 	}
 `;
 
@@ -134,12 +219,17 @@ let vertices = []; // with repetition for normals
 let normals = [];
 let polygons = [];
 
+// Light Variables
 let lightDirection = [-1.0, 1.0, -1.0];
 let lightPoint = [0.0, 0.0, 0.0];
-let eyePosition = [0.0, 0.0, -1.0];
-let drawMode = "Solid";
+let eyePosition = [0.0, 0.0, 0.0];
+// Global DrawMode
+let drawModeGlobal = "Solid";
 
-
+// Scale for the transformation slider values
+// So that they can achieve non-integer numbers
+let transScale = 100;
+let scaleScale = 20;
 
 //javascript main()
 function main() {
@@ -169,6 +259,20 @@ function main() {
 	}
 	
 	drawPowerLines(); // draw my custom model
+
+	// sphere to make it easy to see lighting effects
+	let cylinders = document.getElementById("objnum");
+	let newCyl = document.createElement("option");
+	newCyl.text = Objects.length.toString();
+	newCyl.value = Objects.length;
+	cylinders.add(newCyl);
+	cylinders.value = Objects.length;
+
+	let sphereModel = new Matrix4();
+	let sphere = new Sphere(10, 0.25, [1.0, 1.0, 1.0], sphereModel);
+	sphere.colorHex = "#FFFFFF";
+	Objects.push(sphere);
+	
 	defineLightParameters();
 	changeSelectedObj();
 }
@@ -198,6 +302,10 @@ function defineLightParameters() {
 				  document.getElementById("py").value,
 				  document.getElementById("pz").value];
 
+	lightDirection = [document.getElementById("dx").value,
+				  	  document.getElementById("dy").value,
+				  	  document.getElementById("dz").value];
+
 	gl.uniform3f(u_LightDirection, lightDirection[0], lightDirection[1], lightDirection[2]);
 	gl.uniform3f(u_LightPosition, lightPoint[0], lightPoint[1], lightPoint[2]);
 	gl.uniform3f(u_EyePosition, eyePosition[0], eyePosition[1], eyePosition[2]);
@@ -205,7 +313,7 @@ function defineLightParameters() {
 	gl.uniform3f(u_DiffuseColor, 1.0, 1.0, 1.0);
 	gl.uniform3f(u_AmbientColor, 0.2, 0.2, 0.2);
 	gl.uniform3f(u_SpecularColor, 0.8, 0.8, 0.8);
-	gl.uniform1f(u_SpecularAlpha, 32.0);
+	gl.uniform1f(u_SpecularAlpha, 8.0);
 
 	gl.uniform1f(u_DirectionalLightingOn, (document.getElementById("DirLighting").checked) ? 1.0 : 0.0);
 	gl.uniform1f(u_PointLightingOn, (document.getElementById("PointLighting").checked) ? 1.0 : 0.0);
@@ -214,14 +322,6 @@ function defineLightParameters() {
 	gl.uniform1f(u_SpecularOn, (document.getElementById("SpecularLighting").checked) ? 1.0 : 0.0);
 
 	drawAll();
-
-	// Sphere to represent point light
-	if (document.getElementById("PointLighting").checked) {
-		let sphereModel = new Matrix4();
-		sphereModel.translate(lightPoint[0], lightPoint[1], lightPoint[2]);
-		let sphere = new Sphere(10, [1.0, 1.0, 1.0], sphereModel);
-		draw(sphere, "WireFrame");
-	}
 }
 
 // draw my custom model
@@ -324,10 +424,19 @@ function drawAll() {
 	// clear screen
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	// set global drawmode variable
-	drawMode = document.getElementById("mode").value;
+	drawModeGlobal = document.getElementById("mode").value;
 
+	// draw each object in the objects array
 	for (let obj of Objects) {
-		draw(obj, drawMode);
+		draw(obj, drawModeGlobal);
+	}
+
+	// Sphere to represent point light
+	if (document.getElementById("PointLighting").checked) {
+		let sphereModel = new Matrix4();
+		sphereModel.translate(lightPoint[0], lightPoint[1], lightPoint[2]);
+		let sphere = new Sphere(10, 0.05, [1.0, 1.0, 1.0], sphereModel);
+		draw(sphere, "WireFrame");
 	}
 }
 
@@ -365,7 +474,7 @@ function draw(obj, drawMode) {
 	let normals;
 	let vertices;
 	let indices;
-	if (drawMode == "Gouraud" || drawMode == "Phong") {
+	if (drawMode == "Gouraud" || drawMode == "Phong" || drawMode == "WireFrame") {
 		vertices = new Float32Array(obj.verticesSmooth);
 		normals = new Float32Array(obj.normalsVertex);
 		indices = new Uint16Array(obj.polygonsSmooth);
@@ -422,7 +531,6 @@ function draw(obj, drawMode) {
 		gl.uniform1f(u_ShadingType, 2.0);
 		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 	} else if (drawMode == "Phong") {
-		console.log("UNIMPLEMENTED");
 		gl.uniform1f(u_ShadingType, 3.0);
 		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 	}

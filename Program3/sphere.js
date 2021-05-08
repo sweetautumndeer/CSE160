@@ -25,16 +25,16 @@ class Sphere {
 	// used for loading
 	transformations = [
 		0, 0, 0, // rotateX, rotateY, rotateZ
-		1, 1, 1, // scaleX, scaleY, scaleZ
+		20, 20, 20, // scaleX, scaleY, scaleZ
 		0, 0, 0 // translateX, translateY, translateZ
 	];
 
-	constructor(n, color, modelMatrix) {
+	constructor(n, scale, color, modelMatrix) {
 		this.color = color;
 		this.modelMatrix = modelMatrix;
 		
 		// represent these as 2d arrays for easy reading during bugfixing
-		let objVertices = this.createVertices(n); // an array of 3D points
+		let objVertices = this.createVertices(n, scale); // an array of 3D points
 		let objPolygons = this.createIndices(n); // an array of triangles in terms of 3 points
 
 		this.calcNormalsFlat(objVertices, objPolygons);
@@ -42,11 +42,11 @@ class Sphere {
 	}
 
 
-	createVertices(n) {
+	createVertices(n, scale) {
 		let vertices = [];
-		let scaleFactor = 0.05;
+		let scaleFactor = scale;
 
-		for (let j = 0; j <= n; ++j) {
+		for (let j = 0; j < n; ++j) {
 			let aj = j * Math.PI / n;
 			let sj = Math.sin(aj);
 			let cj = Math.cos(aj);
@@ -70,9 +70,15 @@ class Sphere {
 				let p1 = j * (n+1) + i;
 				let p2 = p1 + (n+1);
 
-				indices.push([p1, p2, p1 + 1]);
-
-				indices.push([p1 + 1, p2, p2 + 1]);
+				// if on it's final iteration
+				if (j == n - 1) {
+					indices.push([i, i + (n+1), i + 1]);
+					indices.push([i + 1, i + (n+1), i + (n+1) + 1]);
+				} else {
+					indices.push([p1, p2, p1 + 1]);
+					indices.push([p1 + 1, p2, p2 + 1]);
+				}
+				
 			}
 		}
 
@@ -127,35 +133,12 @@ class Sphere {
 		this.verticesSmooth = [];
 		this.polygonsSmooth = [];
 		this.normalsVertex = [];
-		let normalsVertexTemp = [];
-
-		// calculate normals for Smooth Shading
+		
+		// calculate normals using vertices
 		for (let i = 0; i < objVertices.length; i++) {
-			normalsVertexTemp[i] = (new Vector3([0, 0, 0]));
-		}
-		for (let i = 0; i < objPolygons.length; i++) {
-			// get the vertices that make up the ith polygon
-			let vertex1 = new Vector3(objVertices[objPolygons[i][0]]);
-			let vertex2 = new Vector3(objVertices[objPolygons[i][1]]);
-			let vertex3 = new Vector3(objVertices[objPolygons[i][2]]);
-
-			// cross product for all 3 vertices
-			let v1 = new Vector3(vertex2.elements);
-			v1.sub(vertex1);
-			let v2 = new Vector3(vertex3.elements);
-			v2.sub(vertex1);
-			let normal = Vector3.cross(v1, v2);
-
-			// add to the existing normals for the relevant vertices
-			normalsVertexTemp[objPolygons[i][0]].add(normal);
-			normalsVertexTemp[objPolygons[i][1]].add(normal);
-			normalsVertexTemp[objPolygons[i][2]].add(normal);
-		}
-		// unpack the array of Vector3s into a 1d array normalsVertex
-		for (let i = 0; i < normalsVertexTemp.length; i++) {
-			this.normalsVertex.push(normalsVertexTemp[i].elements[0]);
-			this.normalsVertex.push(normalsVertexTemp[i].elements[1]);
-			this.normalsVertex.push(normalsVertexTemp[i].elements[2]);
+			this.normalsVertex.push(objVertices[i][0]);
+			this.normalsVertex.push(objVertices[i][1]);
+			this.normalsVertex.push(objVertices[i][2]);
 		}
 		// unpack the 2d array into a 1d array
 		// objVertices -> verticesSmooth
