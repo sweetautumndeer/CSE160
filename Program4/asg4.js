@@ -16,6 +16,8 @@ var VSHADER = `
 	attribute vec3 a_Normal;
 	uniform mat4 u_NormalMatrix;
 	uniform mat4 u_ModelMatrix;
+	uniform mat4 u_ViewMatrix;
+	uniform mat4 u_ProjMatrix;
 
 	// pass to frag shader for phong shading
 	varying vec3 v_Normal;
@@ -46,6 +48,7 @@ var VSHADER = `
 	// Final Color
 	varying vec4 v_Color;
 
+	// pass variables to the frag shader
 	void phongPass() {
 		v_WorldPos = (u_ModelMatrix * vec4(a_Position, 1.0)).xyz;
         v_Normal = normalize(u_NormalMatrix * vec4(a_Normal, 0.0)).xyz; // Normal
@@ -60,8 +63,8 @@ var VSHADER = `
 		vec3 l = normalize(u_LightPosition - worldPos.xyz); //point
 		vec3 ld = normalize(u_LightDirection); //directional
 		vec3 v = normalize(u_EyePosition - worldPos.xyz);
-		vec3 r = reflect(l, n); //reflected light
-		vec3 rd = reflect(ld, n);
+		vec3 r = reflect(-l, n); //reflected light
+		vec3 rd = reflect(-ld, n);
 
 		// Ambient Light (independent of light)
 		vec3 ambient = vec3(0, 0, 0);
@@ -112,7 +115,7 @@ var VSHADER = `
 		else if (u_ShadingType == 1.0) { shading(); } 
 		else if (u_ShadingType == 0.0) { wireFrame(); }
 
-		gl_Position = u_ModelMatrix * vec4(a_Position, 1.0);
+		gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * vec4(a_Position, 1.0);
 	}
 `;
 
@@ -156,8 +159,8 @@ var FSHADER = `
 		vec3 l = normalize(u_LightPosition - v_WorldPos); //point
 		vec3 ld = normalize(u_LightDirection); //directional
 		vec3 v = normalize(u_EyePosition - v_WorldPos);
-		vec3 r = reflect(l, n); //reflected light
-		vec3 rd = reflect(ld, n);
+		vec3 r = reflect(-l, n); //reflected light
+		vec3 rd = reflect(-ld, n);
 
 		// Ambient Light (independent of light)
 		vec3 ambient = vec3(0, 0, 0);
@@ -222,7 +225,11 @@ let polygons = [];
 // Light Variables
 let lightDirection = [-1.0, 1.0, -1.0];
 let lightPoint = [0.0, 0.0, 0.0];
-let eyePosition = [0.0, 0.0, 0.0];
+
+// Camera Variables
+let cam;
+let eyePosition = [0.0, 0.0, 3.0];
+
 // Global DrawMode
 let drawModeGlobal = "Solid";
 
@@ -230,6 +237,68 @@ let drawModeGlobal = "Solid";
 // So that they can achieve non-integer numbers
 let transScale = 100;
 let scaleScale = 20;
+
+// func for keyboard input camera movement
+window.addEventListener("keydown", function(event) {
+	switch(event.key) {
+		case "w": //forward
+			cam.moveForward();
+			drawAll();
+			break;
+		case "a": //left
+
+			break;
+		case "s": //backward
+			cam.moveBackward();
+			drawAll();
+			break;
+		case "d": //right
+
+			break;
+		case " ": //up
+
+			break;
+		case "Control": //down
+
+			break;
+	}
+});
+
+// func for hw3 camera
+window.addEventListener("keydown", function(event) {
+	switch(event.key) {
+		case "f": //front
+			cam.eye = new Vector3([0.0, 0.0, 3.0]);
+			cam.center = new Vector3([0.0, 0.0, 0.0]);
+			drawAll();
+			break;
+		case "b": //back
+			cam.eye = new Vector3([0.0, 0.0, -3.0]);
+			cam.center = new Vector3([0.0, 0.0, 0.0]);
+			drawAll();
+			break;
+		case "l": //left
+			cam.eye = new Vector3([-3.0, 0.0, 0.0]);
+			cam.center = new Vector3([0.0, 0.0, 0.0]);
+			drawAll();
+			break;
+		case "r": //right
+			cam.eye = new Vector3([3.0, 0.0, 0.0]);
+			cam.center = new Vector3([0.0, 0.0, 0.0]);
+			drawAll();
+			break;
+		case "d": //down
+			cam.eye = new Vector3([0.0, -3.0, 0.0]);
+			cam.center = new Vector3([0.0, 0.0, 0.1]);
+			drawAll();
+			break;
+		case "u": //up
+			cam.eye = new Vector3([0.0, 3.0, 0.0]);
+			cam.center = new Vector3([0.0, 0.0, 0.1]);
+			drawAll();
+			break;
+	}
+});
 
 //javascript main()
 function main() {
@@ -257,6 +326,9 @@ function main() {
 		console.log("Failed to initialize webgl shaders");
 		return false;
 	}
+
+	// init camera
+	cam = new Camera();
 	
 	drawPowerLines(); // draw my custom model
 
@@ -273,14 +345,18 @@ function main() {
 	sphere.colorHex = "#FFFFFF";
 	Objects.push(sphere);
 	
-	defineLightParameters();
+	drawAll();
 	changeSelectedObj();
+}
+
+// camera settings
+function defineCameraParameters() {
+	
 }
 
 // set light direction/color
 // and toggle different light effects
 function defineLightParameters() {
-	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	// grab variables from shaders
 	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
@@ -308,7 +384,7 @@ function defineLightParameters() {
 
 	gl.uniform3f(u_LightDirection, lightDirection[0], lightDirection[1], lightDirection[2]);
 	gl.uniform3f(u_LightPosition, lightPoint[0], lightPoint[1], lightPoint[2]);
-	gl.uniform3f(u_EyePosition, eyePosition[0], eyePosition[1], eyePosition[2]);
+	gl.uniform3f(u_EyePosition, cam.eye.elements[0], cam.eye.elements[1], cam.eye.elements[2]);
 
 	gl.uniform3f(u_DiffuseColor, 1.0, 1.0, 1.0);
 	gl.uniform3f(u_AmbientColor, 0.2, 0.2, 0.2);
@@ -320,8 +396,6 @@ function defineLightParameters() {
 	gl.uniform1f(u_DiffuseOn, (document.getElementById("DiffuseLighting").checked) ? 1.0 : 0.0);
 	gl.uniform1f(u_AmbientOn, (document.getElementById("AmbientLighting").checked) ? 1.0 : 0.0);
 	gl.uniform1f(u_SpecularOn, (document.getElementById("SpecularLighting").checked) ? 1.0 : 0.0);
-
-	drawAll();
 }
 
 // draw my custom model
@@ -371,7 +445,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(90, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.05, 0.05, 1);
-	modelMatrix.translate(2, 13, 0);
+	modelMatrix.translate(0, 13, 0);
 	let cylinder2 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder2.colorHex = "#5c4033";
 	cylinder2.transformations = [
@@ -387,7 +461,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(90, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.05, 0.05, 1);
-	modelMatrix.translate(2, 8, 0);
+	modelMatrix.translate(0, 8, 0);
 	let cylinder3 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder3.colorHex = "#5c4033";
 	cylinder3.transformations = [
@@ -426,6 +500,8 @@ function drawAll() {
 	// set global drawmode variable
 	drawModeGlobal = document.getElementById("mode").value;
 
+	defineLightParameters();
+
 	// draw each object in the objects array
 	for (let obj of Objects) {
 		draw(obj, drawModeGlobal);
@@ -438,33 +514,6 @@ function drawAll() {
 		let sphere = new Sphere(10, 0.05, [1.0, 1.0, 1.0], sphereModel);
 		draw(sphere, "WireFrame");
 	}
-}
-
-// change the Fragment Shader's color
-// color = [r, g, b]
-function defineFragColor(color) {
-	// get u_Color variable from fragment shader
-	let u_Color = gl.getUniformLocation(gl.program, "u_Color");
-	// set u_Color
-	gl.uniform3f(u_Color, color[0], color[1], color[2]);
-}
-
-// initialize a standard array buffer
-// return the created buffer
-function initBuffer(attributeName, num) {
-	let shaderBuffer = gl.createBuffer();
-	if (!shaderBuffer) {
-		console.log("Can't create buffer.");
-		return -1;
-	}
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, shaderBuffer);
-
-	let attrib = gl.getAttribLocation(gl.program, attributeName);
-	gl.vertexAttribPointer(attrib, num, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(attrib);
-
-	return shaderBuffer;
 }
 
 // draw an object using WebGL
@@ -497,11 +546,25 @@ function draw(obj, drawMode) {
 	// create transformation matrices from object data
 	let u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
 	let u_NormalMatrix = gl.getUniformLocation(gl.program, "u_NormalMatrix");
+	let u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
+	let u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
+	//Model Matrix
 	gl.uniformMatrix4fv(u_ModelMatrix, false, obj.modelMatrix.elements);
+	// Normal Matrix
 	normalMatrix = new Matrix4(); //normalMatrix = inverse transpose of modelMatrix
 	normalMatrix.setInverseOf(obj.modelMatrix);
 	normalMatrix.transpose();
-	gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements)
+	gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
+	// View Matrix
+	let viewMatrix = new Matrix4();
+	viewMatrix.setLookAt(cam.eye.elements[0], cam.eye.elements[1], cam.eye.elements[2], 
+		                 cam.center.elements[0], cam.center.elements[1], cam.center.elements[2], // center: [0, 0, 0]
+						 0, 1, 0);// vector that defines "up": [0, 1, 0]
+	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+	// Projection Matrix
+	let projMatrix = new Matrix4();
+	projMatrix.setPerspective(60, canvas.width/canvas.height, 0.1, 1000); // magic numbers babey!!!!
+	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
 	// init array buffers
 	let vertexBuffer = initBuffer("a_Position", 3);
@@ -534,6 +597,33 @@ function draw(obj, drawMode) {
 		gl.uniform1f(u_ShadingType, 3.0);
 		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 	}
+}
+
+// change the Fragment Shader's color
+// color = [r, g, b]
+function defineFragColor(color) {
+	// get u_Color variable from fragment shader
+	let u_Color = gl.getUniformLocation(gl.program, "u_Color");
+	// set u_Color
+	gl.uniform3f(u_Color, color[0], color[1], color[2]);
+}
+
+// initialize a standard array buffer
+// return the created buffer
+function initBuffer(attributeName, num) {
+	let shaderBuffer = gl.createBuffer();
+	if (!shaderBuffer) {
+		console.log("Can't create buffer.");
+		return -1;
+	}
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, shaderBuffer);
+
+	let attrib = gl.getAttribLocation(gl.program, attributeName);
+	gl.vertexAttribPointer(attrib, num, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(attrib);
+
+	return shaderBuffer;
 }
 
 // call drawUnitCylinder using the input from the user

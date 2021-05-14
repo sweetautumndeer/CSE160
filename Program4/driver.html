@@ -30,34 +30,34 @@
 	             </select>
 	  </br>
 	  Directional Lighting: <label class="switch">
-		  <input type="checkbox" id="DirLighting" oninput="defineLightParameters()">
+		  <input type="checkbox" id="DirLighting" oninput="drawAll()">
 		  <span class="slider round"></span>
 	  </label>
 	  Point Lighting: <label class="switch">
-		<input checked="true" type="checkbox" id="PointLighting" oninput="defineLightParameters()">
+		<input checked="true" type="checkbox" id="PointLighting" oninput="drawAll()">
 		<span class="slider round"></span>
 	  </label> 
 	  </br>
 	  Directional Light Vector: 
-	  X: <input value="-1" id="dx" type="number" oninput="defineLightParameters()"></input> 
-	  Y: <input value="1" id="dy" type="number" oninput="defineLightParameters()"></input> 
-	  Z: <input value="-1" id="dz" type="number" oninput="defineLightParameters()"></input>
+	  X: <input value="-1" id="dx" type="number" oninput="drawAll()"></input> 
+	  Y: <input value="1" id="dy" type="number" oninput="drawAll()"></input> 
+	  Z: <input value="-1" id="dz" type="number" oninput="drawAll()"></input>
 	  </br>
 	  Point Light Position: 
-	  X: <input value="0.5" id="px" type="number" oninput="defineLightParameters()"></input> 
-	  Y: <input value="0.5" id="py" type="number" oninput="defineLightParameters()"></input> 
-	  Z: <input value="-0.5" id="pz" type="number" oninput="defineLightParameters()"></input>
+	  X: <input value="0.5" id="px" type="number" oninput="drawAll()"></input> 
+	  Y: <input value="0.5" id="py" type="number" oninput="drawAll()"></input> 
+	  Z: <input value="0.5" id="pz" type="number" oninput="drawAll()"></input>
 	  </br>
 	  Ambient: <label class="switch">
-		<input checked="true" type="checkbox" value="ambient" name="LightingEffects" id="AmbientLighting" oninput="defineLightParameters()">
+		<input checked="true" type="checkbox" value="ambient" name="LightingEffects" id="AmbientLighting" oninput="drawAll()">
 		<span class="slider round"></span>
 	  </label>
 	  Diffuse: <label class="switch">
-		<input checked="true" type="checkbox" value="diffuse" name="LightingEffects" id="DiffuseLighting" oninput="defineLightParameters()">
+		<input checked="true" type="checkbox" value="diffuse" name="LightingEffects" id="DiffuseLighting" oninput="drawAll()">
 		<span class="slider round"></span>
 	  </label>
 	  Specular: <label class="switch">
-		<input checked="true" type="checkbox" value="specular" name="LightingEffects" id="SpecularLighting" oninput="defineLightParameters()">
+		<input checked="true" type="checkbox" value="specular" name="LightingEffects" id="SpecularLighting" oninput="drawAll()">
 		<span class="slider round"></span>
 	  </label> 
 	  </br>---------------------------------</br>
@@ -87,9 +87,10 @@
 	  <input value="Save" type="button" onclick="saveObj()"></input> -->
 
 	  <!-- load main -->
-	  <script src="asg3.js"></script>
+	  <script src="asg4.js"></script>
 	  <script src="cylinder.js"></script>
 	  <script src="sphere.js"></script>
+	  <script src="camera.js"></script>
 
 	  <!-- load external libraries -->
 	  <script src="../lib/cuon-matrix-cse160.js"></script>
