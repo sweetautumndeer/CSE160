@@ -2,8 +2,8 @@
 // Autumn Moulios ~ 4/25/2021 ~ CSE 160
 // amoulios
 // 
-// Assignment 3
-// Smooth Lighting
+// Assignment 4
+// Camera Movement
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Shaders (GLSL)
@@ -230,6 +230,14 @@ let lightPoint = [0.0, 0.0, 0.0];
 let cam;
 let eyePosition = [0.0, 0.0, 3.0];
 
+// Animation Variables
+let animationPoints = [[0.0, 0.0, 3.0],
+                       [3.0, 1.0, 0.0],
+					   [0.0, 2.0, -3.0],
+					   [-3.0, 1.0, 0.0]];
+let animationPosition = 0;
+let t = 0;
+
 // Global DrawMode
 let drawModeGlobal = "Solid";
 
@@ -238,67 +246,18 @@ let drawModeGlobal = "Solid";
 let transScale = 100;
 let scaleScale = 20;
 
-// func for keyboard input camera movement
-window.addEventListener("keydown", function(event) {
-	switch(event.key) {
-		case "w": //forward
-			cam.moveForward();
-			drawAll();
-			break;
-		case "a": //left
+// for movement calculations
+let selected = false;
+let lastClientX;
+let lastClientY;
 
-			break;
-		case "s": //backward
-			cam.moveBackward();
-			drawAll();
-			break;
-		case "d": //right
-
-			break;
-		case " ": //up
-
-			break;
-		case "Control": //down
-
-			break;
-	}
-});
-
-// func for hw3 camera
-window.addEventListener("keydown", function(event) {
-	switch(event.key) {
-		case "f": //front
-			cam.eye = new Vector3([0.0, 0.0, 3.0]);
-			cam.center = new Vector3([0.0, 0.0, 0.0]);
-			drawAll();
-			break;
-		case "b": //back
-			cam.eye = new Vector3([0.0, 0.0, -3.0]);
-			cam.center = new Vector3([0.0, 0.0, 0.0]);
-			drawAll();
-			break;
-		case "l": //left
-			cam.eye = new Vector3([-3.0, 0.0, 0.0]);
-			cam.center = new Vector3([0.0, 0.0, 0.0]);
-			drawAll();
-			break;
-		case "r": //right
-			cam.eye = new Vector3([3.0, 0.0, 0.0]);
-			cam.center = new Vector3([0.0, 0.0, 0.0]);
-			drawAll();
-			break;
-		case "d": //down
-			cam.eye = new Vector3([0.0, -3.0, 0.0]);
-			cam.center = new Vector3([0.0, 0.0, 0.1]);
-			drawAll();
-			break;
-		case "u": //up
-			cam.eye = new Vector3([0.0, 3.0, 0.0]);
-			cam.center = new Vector3([0.0, 0.0, 0.1]);
-			drawAll();
-			break;
-	}
-});
+// booleans for movement (handled in move())
+let w = false;
+let a = false;
+let s = false;
+let d = false;
+let shift = false;
+let ctrl = false;
 
 //javascript main()
 function main() {
@@ -318,7 +277,7 @@ function main() {
 
 	// clear the screen
 	gl.enable(gl.DEPTH_TEST);
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.clearColor(0.1, 0.1, 0.1, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	// compile and send shaders to GPU
@@ -347,11 +306,145 @@ function main() {
 	
 	drawAll();
 	changeSelectedObj();
+	loadPoint();
 }
 
-// camera settings
-function defineCameraParameters() {
-	
+// click on canvas = use mouse input
+// click again anywhere = cancel mouse input
+window.addEventListener("mousedown", function(event) {
+	if (event.target.id == "cvs1" && !selected) {
+		selected = true;
+	}
+});
+
+window.addEventListener("mouseup", function(event) {
+	selected = false;
+});
+
+// tilt/pan when mouse movement
+window.addEventListener("mousemove", function(event) {
+	if (selected && document.getElementById("animation").value == "none") {
+		cam.tilt(event.clientY - lastClientY);
+		cam.pan(lastClientX - event.clientX);
+	}
+
+	lastClientX = event.clientX;
+	lastClientY = event.clientY;
+});
+
+// func for keyboard input camera movement
+window.addEventListener("keydown", function(event) {
+	switch(event.key) {
+		case "w": //forward
+			w = true;
+			break;
+		case "a": //left
+			a = true;
+			break;
+		case "s": //backward
+			s = true;
+			break;
+		case "d": //right
+			d = true;
+			break;
+		case "Shift": //up
+			shift = true;
+			break;
+		case "Control": //down
+			ctrl = true;
+			break;
+		case "r":
+			// reset camera
+			cam = new Camera();
+			break;
+	}
+});
+
+// detect when a button is no longer held down
+// and cancel movement
+window.addEventListener("keyup", function(event) {
+	switch(event.key) {
+		case "w": //forward
+			w = false;
+			break;
+		case "a": //left
+			a = false;
+			break;
+		case "s": //backward
+			s = false;
+			break;
+		case "d": //right
+			d = false;
+			break;
+		case "Shift": //up
+			shift = false;
+			break;
+		case "Control": //down
+			ctrl = false;
+			break;
+	}
+});
+
+// take care of movement (called in drawAll())
+function move() {
+	if (w)
+		cam.moveForward();
+	if (a)
+		cam.moveSideways("Left");
+	if (s)
+		cam.moveBackward();
+	if (d)
+		cam.moveSideways("Right");
+	if (shift)
+		cam.moveUp();
+	if (ctrl)
+		cam.moveDown();
+}
+
+// change animation points when edited through the ui
+function editAnimation() {
+	let selectedPoint = parseInt(document.getElementById("animPoint").value);
+	animationPoints[selectedPoint][0] = parseInt(document.getElementById("animX").value);
+	animationPoints[selectedPoint][1] = parseInt(document.getElementById("animY").value);
+	animationPoints[selectedPoint][2] = parseInt(document.getElementById("animZ").value);
+	console.log(animationPoints);
+}
+
+// load animation points into the ui when selected
+function loadPoint() {
+	let selectedPoint = parseInt(document.getElementById("animPoint").value);
+	document.getElementById("animX").value = animationPoints[selectedPoint][0];
+	document.getElementById("animY").value = animationPoints[selectedPoint][1];
+	document.getElementById("animZ").value = animationPoints[selectedPoint][2];
+}
+
+// animation involving linear interpolation between points
+function linearAnimation() {
+	cam.center.set(new Vector3([0.0, 0.0, 0.0]))
+	t += 0.01; // speed of animation
+	if (t <= 1) {
+		if (animationPosition == animationPoints.length - 1) {
+			cam.eye.elements[0] = animationPoints[animationPosition][0] + t * (animationPoints[0][0] - animationPoints[animationPosition][0]);
+			cam.eye.elements[1] = animationPoints[animationPosition][1] + t * (animationPoints[0][1] - animationPoints[animationPosition][1]);
+			cam.eye.elements[2] = animationPoints[animationPosition][2] + t * (animationPoints[0][2] - animationPoints[animationPosition][2]);
+		} else {
+			cam.eye.elements[0] = animationPoints[animationPosition][0] + t * (animationPoints[animationPosition + 1][0] - animationPoints[animationPosition][0]);
+			cam.eye.elements[1] = animationPoints[animationPosition][1] + t * (animationPoints[animationPosition + 1][1] - animationPoints[animationPosition][1]);
+			cam.eye.elements[2] = animationPoints[animationPosition][2] + t * (animationPoints[animationPosition + 1][2] - animationPoints[animationPosition][2]);
+		}
+	} else {
+		t = 0;
+		if (animationPosition == animationPoints.length - 1)
+			animationPosition = 0;
+		else
+			animationPosition++;
+	}
+}
+
+// similar animation as above but with cubic curve interpolation
+function cubicAnimation() {
+	cam.center.set(new Vector3([0.0, 0.0, 0.0]))
+	t += 0.01; // speed of animation
 }
 
 // set light direction/color
@@ -514,6 +607,17 @@ function drawAll() {
 		let sphere = new Sphere(10, 0.05, [1.0, 1.0, 1.0], sphereModel);
 		draw(sphere, "WireFrame");
 	}
+	
+	// handle animation mode
+	if (document.getElementById("animation").value == "linear") {
+		linearAnimation();
+	} else if (document.getElementById("animation").value == "cubic") {
+		cubicAnimation();
+	} else {
+		move(); // handle camera movement
+	}
+	
+	requestAnimationFrame(drawAll); // redraw on a cycle
 }
 
 // draw an object using WebGL
@@ -548,22 +652,32 @@ function draw(obj, drawMode) {
 	let u_NormalMatrix = gl.getUniformLocation(gl.program, "u_NormalMatrix");
 	let u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
 	let u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
-	//Model Matrix
+
+	//Model Matrix (stored in object)
 	gl.uniformMatrix4fv(u_ModelMatrix, false, obj.modelMatrix.elements);
+
 	// Normal Matrix
 	normalMatrix = new Matrix4(); //normalMatrix = inverse transpose of modelMatrix
 	normalMatrix.setInverseOf(obj.modelMatrix);
 	normalMatrix.transpose();
 	gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
+
 	// View Matrix
 	let viewMatrix = new Matrix4();
 	viewMatrix.setLookAt(cam.eye.elements[0], cam.eye.elements[1], cam.eye.elements[2], 
 		                 cam.center.elements[0], cam.center.elements[1], cam.center.elements[2], // center: [0, 0, 0]
 						 0, 1, 0);// vector that defines "up": [0, 1, 0]
 	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+
 	// Projection Matrix
 	let projMatrix = new Matrix4();
-	projMatrix.setPerspective(60, canvas.width/canvas.height, 0.1, 1000); // magic numbers babey!!!!
+	// which projection type?
+	let zoom = document.getElementById("zoom").value;
+	if (document.getElementById("proj").value == "Perspective"){
+		projMatrix.setPerspective(zoom, canvas.width/canvas.height, 0.1, 1000); // magic numbers babey!!!!
+	} else {
+		projMatrix.setOrtho(-1/60 * zoom, 1/60 * zoom, -1/60 * zoom, 1/60 * zoom, 0.1, 1000); // more magic numbers
+	}
 	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
 	// init array buffers
@@ -668,9 +782,6 @@ function removeCylinder() {
 
 	// remove cylinder from Objects array
 	Objects.splice(objnum.value, 1);
-
-	// redraw
-	drawAll();
 }
 
 // load the selected cylinder's attributes/transformations into the user input
@@ -729,9 +840,6 @@ function transformObj() {
 	]
 	Objects[objnum].colorHex = hex;
 	Objects[objnum].color = color;
-
-	// redraw
-	drawAll();
 }
 
 // converts #RRGGBB into [r, g, b]

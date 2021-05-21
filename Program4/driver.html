@@ -3,8 +3,8 @@
 // Autumn Moulios ~ 4/25/2021 ~ CSE 160
 // amoulios
 // 
-// Assignment 3
-// Smooth Lighting
+// Assignment 4
+// Camera Movement
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
 
@@ -12,7 +12,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>Program 3: Smooth Shading</title>
+		<title>Program 4: Camera Movement</title>
 	</head>
 	
 	<body onload="main()">
@@ -22,42 +22,64 @@
 
 	  </br>	
 	  <!-- Take input for the number of sides to the circle (n) and whether to draw the endcaps-->
-	  Draw Mode: <select id="mode" oninput="drawAll()">
+	  Draw Mode: <select id="mode" oninput="">
 		                <option value="WireFrame">WireFrame</option>
 						<option value="Solid">Flat Shading</option>
-						<option selected="selected" value="Gouraud">Gouraud Shading</option>
-						<option value="Phong">Phong Shading</option>
+						<option value="Gouraud">Gouraud Shading</option>
+						<option selected="selected" value="Phong">Phong Shading</option>
 	             </select>
 	  </br>
+	  Projection Mode: <select id="proj" oninput="">
+						<option selected="selected" value="Perspective">Perspective</option>
+						<option value="Orthographic">Orthographic</option>
+					   </select>
+	  </br>
+	  Zoom: <input value="60" id="zoom" type="range" min="0.1" max="90" class="slider" oninput=""></input> </br>
+	  Animation: <select id="animation" oninput="">
+		<option selected="selected" value="none">None</option>
+		<option value="linear">Linear</option>
+		<option value="cubic">Cubic</option>
+	   </select> </br>
+	  Animation Point: <select id="animPoint" oninput="loadPoint()">
+		<option selected="selected" value=0>0</option>
+		<option value=1>1</option>
+		<option value=2>2</option>
+		<option value=3>3</option>
+	   </select> </br>
+	   Animation Point Value: 
+	   X: <input value="" id="animX" type="number" oninput="editAnimation()"></input> 
+	   Y: <input value="" id="animY" type="number" oninput="editAnimation()"></input> 
+	   Z: <input value="" id="animZ" type="number" oninput="editAnimation()"></input>
+	</br>---------------------------------</br>
 	  Directional Lighting: <label class="switch">
-		  <input type="checkbox" id="DirLighting" oninput="drawAll()">
+		  <input type="checkbox" id="DirLighting" oninput="">
 		  <span class="slider round"></span>
 	  </label>
 	  Point Lighting: <label class="switch">
-		<input checked="true" type="checkbox" id="PointLighting" oninput="drawAll()">
+		<input checked="true" type="checkbox" id="PointLighting" oninput="">
 		<span class="slider round"></span>
 	  </label> 
 	  </br>
 	  Directional Light Vector: 
-	  X: <input value="-1" id="dx" type="number" oninput="drawAll()"></input> 
-	  Y: <input value="1" id="dy" type="number" oninput="drawAll()"></input> 
-	  Z: <input value="-1" id="dz" type="number" oninput="drawAll()"></input>
+	  X: <input value="-1" id="dx" type="number" oninput=""></input> 
+	  Y: <input value="1" id="dy" type="number" oninput=""></input> 
+	  Z: <input value="-1" id="dz" type="number" oninput=""></input>
 	  </br>
 	  Point Light Position: 
-	  X: <input value="0.5" id="px" type="number" oninput="drawAll()"></input> 
-	  Y: <input value="0.5" id="py" type="number" oninput="drawAll()"></input> 
-	  Z: <input value="0.5" id="pz" type="number" oninput="drawAll()"></input>
+	  X: <input value="0.5" id="px" type="number" oninput=""></input> 
+	  Y: <input value="0.5" id="py" type="number" oninput=""></input> 
+	  Z: <input value="0.5" id="pz" type="number" oninput=""></input>
 	  </br>
 	  Ambient: <label class="switch">
-		<input checked="true" type="checkbox" value="ambient" name="LightingEffects" id="AmbientLighting" oninput="drawAll()">
+		<input checked="true" type="checkbox" value="ambient" name="LightingEffects" id="AmbientLighting" oninput="">
 		<span class="slider round"></span>
 	  </label>
 	  Diffuse: <label class="switch">
-		<input checked="true" type="checkbox" value="diffuse" name="LightingEffects" id="DiffuseLighting" oninput="drawAll()">
+		<input checked="true" type="checkbox" value="diffuse" name="LightingEffects" id="DiffuseLighting" oninput="">
 		<span class="slider round"></span>
 	  </label>
 	  Specular: <label class="switch">
-		<input checked="true" type="checkbox" value="specular" name="LightingEffects" id="SpecularLighting" oninput="drawAll()">
+		<input checked="true" type="checkbox" value="specular" name="LightingEffects" id="SpecularLighting" oninput="">
 		<span class="slider round"></span>
 	  </label> 
 	  </br>---------------------------------</br>
