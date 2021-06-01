@@ -1,10 +1,10 @@
 <!--
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Autumn Moulios ~ 4/11/2021 ~ CSE 160
+// Autumn Moulios ~ 4/25/2021 ~ CSE 160
 // amoulios
 // 
-// Assignment 1
-// Drawing a Cylinder
+// Assignment 2
+// 3D World
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
 
@@ -15,26 +15,32 @@
 		<title>Autumn Moulios</title>
 	</head>
 	
-	<body>
+	<body bgcolor="#e0e0e0">
         Autumn Moulios (amoulios) </br>
         CSE 160 Programming Assignment 2 </br>
-        4/11/2021 </br>
+        4/25/2021 </br>
         </br>
-        <a href="driver.html">Assignment 2 HTML Page</a></br>
-        <a href="asg2.js">Javascript Code</a>
+        <a href="driver.html">Assignment 2 Driver HTML Page</a></br>
+        <a href="asg2.js">Javascript Code</a></br>
+        <a href="cylinder.js">Cylinder Class</a> 
         </br></br>
-        Instructions:</br>
-        Type a number into the first box (e.g. 5) to define how many sides the created shape will have.</br>
-        Choose True in the second box to draw Endcaps. Example:</br>
-        <img src="Pentagon_Endcaps.png"></img></br>
-        Choose False to draw the shape without Endcaps. Example:</br>
-        <img src="Pentagon_Hollow.png"></img></br>
+        By default my power lines model is displayed in the 3D scene, and can be edited using the ui</br>
+        <img src="Model.PNG"></img></br>
         </br>
-        Clicking the "Draw" button will draw the shape, and save two files that define the shape: </br>
-        A <a href="example_cylinder.coor">.coor file</a> and a <a href="example_cylinder.poly">.poly file</a>.</br>
-        The console will also output the number of vertices and polygons in the shape (including endcaps).</br>
-        <img src="Pentagon_Console.png"></img></br>
-        ((Don't worry, that warning at the top is for webgl-utils.js for some reason))
-
+        Instructions:</br>
+        Type a number into the first box (e.g. 5) to define how many sides a created shape will have.</br>
+        There are two Draw Modes: WireFrame (No Shading) and Solid (Flat Shading). These affect the whole scene when chosen. </br>
+        The "Cylinder" dropdown menu allows the user to select one of multiple cylinders in the 3D scene and transform it using the sliders below.</br>
+        <img src="Attributes.PNG"></img></br>
+        </br>
+        Transformations:</br>
+        The first row handles rotations around the x, y, and z axes respectively.</br>
+        The second row handles the scale along these axes in the same order.</br>
+        The third row handles translation along these axes.</br>
+        <img src="Transformations.PNG"></img></br>
+        
+        Clicking the "Create Cylinder" button will make a cylinder with the user's specified attributes/transformations: </br>
+        Clicking the "Delete Cylinder" button will remove the cylinder selected in the "Cylinder" dropdown menu.</br>
+        <img src="CreateDelete.PNG"></img></br>
 	</body>
 </html>

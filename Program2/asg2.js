@@ -3,7 +3,7 @@
 // amoulios
 // 
 // Assignment 2
-// Drawing a Cylinder
+// 3D World
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Shaders (GLSL)
@@ -13,7 +13,8 @@ var VSHADER = `
 
 	attribute vec3 a_Position; // (x,y,z)
 	attribute vec3 a_Normal;
-
+	
+	uniform float u_FlatShading; // bool for whether to render flat shading
 	uniform mat4 u_Model;
 	uniform vec3 u_LightColor;
 	uniform vec3 u_LightDirection;
@@ -21,7 +22,8 @@ var VSHADER = `
 
 	varying vec4 v_Color;
 
-	void main() {
+	// compute diffuse for flat shading
+	void flatShading() {
 		vec3 normal = (u_Model * vec4(a_Normal, 1.0)).xyz;
 		normal = normalize(normal);
 
@@ -31,28 +33,20 @@ var VSHADER = `
         vec3 diffuse = u_LightColor * u_Color * nDotL;
 
         v_Color = vec4(diffuse, 1.0);
-
-		gl_Position = u_Model * vec4(a_Position, 1.0);
 	}
-`;
 
-var WIREFRAMEVSHADER = `
-	precision mediump float;
-
-	attribute vec3 a_Position;
-
-	uniform mat4 u_Model;
-	uniform vec3 u_Color
-
-	varying vec4 v_Color;
+	// wireframe without shading
+	void wireFrame() {
+		v_Color = vec4(u_Color, 1.0);
+	}
 
 	void main() {
-		v_Color = vec4(u_Color, 1.0);
+		if (u_FlatShading == 1.0) {	flatShading(); } 
+		else if (u_FlatShading == 0.0) { wireFrame(); }
+
 		gl_Position = u_Model * vec4(a_Position, 1.0);
 	}
 `;
-
-// gl_Position = u_Scaling * u_Rotation * vec4(a_Position, 1.0) + vec4(u_Translation, 1.0);
 
 // Fragment Shader
 // Takes "pixels" rather than vertices and assigns colors
@@ -111,47 +105,142 @@ function main() {
 		return false;
 	}
 
-	light = new Vector3([1.0, 1.0, 1.0]);
-
-	defineParameters();
-	//drawAll();
+	defineLightParameters();
+	drawPowerLines(); // draw my custom model
 }
 
-function defineParameters() {
-	// create model matrix for transformations
-	let modelMatrix = new Matrix4();
-	modelMatrix.rotate(60, 1, 0, 0);
-	modelMatrix.translate(0, 0, 0);
-	modelMatrix.scale(0.5, 0.5, 0.5);
-
+// set light direction/color
+function defineLightParameters() {
 	// grab variables from shaders
-	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
 	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
 	let u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
 
-	gl.uniformMatrix4fv(u_Model, false, modelMatrix.elements);
-	gl.uniform3f(u_LightDirection, 1.0, 0.0, -2.0);
+	gl.uniform3f(u_LightDirection, 1.0, 1.0, 1.0);
 	gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
 
 }
 
+// draw my custom model
+function drawPowerLines() {
+	// define cylinder inputs
+	let n;
+	let endcaps = "True";
+	let color;
+	let modelMatrix;
+	let scaleCoefficient = 20;
+	let translateCoefficient = 100;
+
+	// create selection options in ui
+	let cylinders = document.getElementById("objnum");
+	for (let i = 0; i < 4; i++) {
+		let newCyl = document.createElement("option");
+		newCyl.text = i.toString();
+		newCyl.value = i;
+		cylinders.add(newCyl);
+		cylinders.value = Objects.length;
+	}
+
+
+
+	// create cylinders
+	n = 10;
+	color = [92 / 255, 64 / 255, 51 / 255];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(90, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.1, 0.1, 1.5);
+	modelMatrix.translate(0, 1, 0);
+	let cylinder1 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder1.colorHex = "#5c4033"
+	cylinder1.transformations = [
+		90, 0, 0, //rotateX, rotateY, rotateZ
+		0.1 * scaleCoefficient, 0.1 * scaleCoefficient, 1.5 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		0, 0, 0 // translateX, translateY, translateZ
+	];
+
+
+	n = 10;
+	color = [92 / 255, 64 / 255, 51 / 255];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(90, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.05, 0.05, 1);
+	modelMatrix.translate(2, 13, 0);
+	let cylinder2 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder2.colorHex = "#5c4033";
+	cylinder2.transformations = [
+		0, 90, 0, //rotateX, rotateY, rotateZ
+		0.05 * scaleCoefficient, 0.05 * scaleCoefficient, 1 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		0, 13 * translateCoefficient, 0 // translateX, translateY, translateZ
+	];
+
+	n = 10;
+	color = [92 / 255, 64 / 255, 51 / 255];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(0, 1, 0, 0);
+	modelMatrix.rotate(90, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.05, 0.05, 1);
+	modelMatrix.translate(2, 8, 0);
+	let cylinder3 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder3.colorHex = "#5c4033";
+	cylinder3.transformations = [
+		0, 90, 0, //rotateX, rotateY, rotateZ
+		0.05 * scaleCoefficient, 0.05 * scaleCoefficient, 1 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		0, 8 * translateCoefficient, 0 // translateX, translateY, translateZ
+	];
+
+	n = 10;
+	color = [0.5, 0.5, 0.5];
+	modelMatrix = new Matrix4();
+	modelMatrix.rotate(90, 1, 0, 0);
+	modelMatrix.rotate(0, 0, 1, 0);
+	modelMatrix.rotate(0, 0, 0, 1);
+	modelMatrix.scale(0.1, 0.1, 0.3);
+	modelMatrix.translate(2, -0.5, -0.5);
+	let cylinder4 = new Cylinder(n, endcaps, color, modelMatrix);
+	cylinder4.colorHex = "#808080";
+	cylinder4.transformations = [
+		90, 0, 0, //rotateX, rotateY, rotateZ
+		0.1 * scaleCoefficient, 0.1 * scaleCoefficient, 0.3 * scaleCoefficient, // scaleX, scaleY, scaleZ
+		2 * translateCoefficient, 0.3 * translateCoefficient, -0.5 * translateCoefficient // translateX, translateY, translateZ
+	];
+
+	// add cylinders to the Objects array for drawing
+	Objects.push(cylinder1);
+	Objects.push(cylinder2);
+	Objects.push(cylinder3);
+	Objects.push(cylinder4);
+
+	// draw
+	drawAll();
+}
+
+// loop through the Objects array and draw each
 function drawAll() {
-	while (true) {
-		for (let obj of Objects) {
-			drawSolid(obj[0], obj[1], obj[2]);
-		}
+	// clear screen
+	gl.clear(gl.COLOR_BUFFER_BIT);
+	// set global drawmode variable
+	drawMode = document.getElementById("mode").value;
+
+	for (let obj of Objects) {
+		draw(obj);
 	}
 }
 
 // change the Fragment Shader's color
 // color = [r, g, b]
 function defineFragColor(color) {
-    // get u_Color variable from fragment shader
-    let u_Color = gl.getUniformLocation(gl.program, "u_Color");
+	// get u_Color variable from fragment shader
+	let u_Color = gl.getUniformLocation(gl.program, "u_Color");
 	// set u_Color
 	gl.uniform3f(u_Color, color[0], color[1], color[2]);
 }
 
+// initialize a standard array buffer
+// return the created buffer
 function initBuffer(attributeName, num) {
 	let shaderBuffer = gl.createBuffer();
 	if (!shaderBuffer) {
@@ -168,69 +257,14 @@ function initBuffer(attributeName, num) {
 	return shaderBuffer;
 }
 
-function drawWireframe(vertexArray, polygonsArray) {
+// draw an object using WebGL
+function draw(obj) {
 	// create triangle in cpu memory
-	let vertices = [];
-	for (i = 0; i < vertexArray.length; i ++) { // unwrap the 2d array
-		vertices.push(vertexArray[i][0]);
-		vertices.push(vertexArray[i][1]);
-		vertices.push(vertexArray[i][2]);
-	}
-	vertices = new Float32Array(vertices);
-
-	// create vertex buffer in gpu memory
-	let vertexBuffer = gl.createBuffer();
-	if (!vertexBuffer) {
-		console.log("Failed to create buffer");
-		return false;
-	}
-
-	// create indices array in cpu memory
-	let indices = [];
-	for (i = 0; i < polygonsArray.length; i ++) { // unwrap the 2d array
-		indices.push(polygonsArray[i][0]);
-		indices.push(polygonsArray[i][1]);
-		indices.push(polygonsArray[i][2]);
-		indices.push(polygonsArray[i][0]);
-	}
-	indices = new Uint16Array(indices);
-
-	// create indices buffer in gpu
-	let indicesBuffer = gl.createBuffer();
-	if (!indicesBuffer) {
-		console.log("Failed to create buffer");
-		return false;
-	}
-
-	gl.clear(gl.COLOR_BUFFER_BIT);
-
-	// set fragment shader color
-	defineFragColor([1.0, 0.0, 0.0]);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer); // vertexBuffer assigned to an array buffer in webgl
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer); // same for indicesBuffer
-
-	let a_Position = gl.getAttribLocation(gl.program, "a_Position"); // send triangle to gpu
-	                                                                 // gl.program is where the shaders go when compiled
-	gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0); //read points in pairs of floats
-	gl.enableVertexAttribArray(a_Position);
-
-	// send data from cpu arrays
-	gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-
-	//gl.drawArrays(gl.LINE_LOOP, 0, vertex.length / 3);
-	gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
-}
-
-// draw a triangle from 3 points using WebGL
-function drawSolid(vertexArray, polygonsArray, normalArray) {
-	// create triangle in cpu memory
-	let vertices = new Float32Array(vertexArray);
+	let vertices = new Float32Array(obj.vertices);
 	// create normals array in cpu memory
-	let normals = new Float32Array(normalArray);
+	let normals = new Float32Array(obj.normals);
 	// create indices array in cpu memory
-	let indices = new Uint16Array(polygonsArray);
+	let indices = new Uint16Array(obj.polygons);
 	// create indices buffer in gpu
 	let indicesBuffer = gl.createBuffer();
 	if (!indicesBuffer) {
@@ -238,11 +272,12 @@ function drawSolid(vertexArray, polygonsArray, normalArray) {
 		return false;
 	}
 
-	gl.clear(gl.COLOR_BUFFER_BIT);
-
 	// set fragment shader color
-	defineFragColor([1.0, 0.0, 0.0]);
-	
+	defineFragColor(obj.color);
+	let u_Model = gl.getUniformLocation(gl.program, "u_Model");
+	gl.uniformMatrix4fv(u_Model, false, obj.modelMatrix.elements);
+
+	// init array buffers
 	let vertexBuffer = initBuffer("a_Position", 3);
 	let normalBuffer = initBuffer("a_Normal", 3);
 
@@ -254,140 +289,161 @@ function drawSolid(vertexArray, polygonsArray, normalArray) {
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-	//gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
-	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+	let u_FlatShading = gl.getUniformLocation(gl.program, "u_FlatShading");
+	if (drawMode == "WireFrame") {
+		gl.uniform1f(u_FlatShading, 0.0); // pass false to the vshader
+		gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
+	} else if (drawMode == "Solid") {
+		gl.uniform1f(u_FlatShading, 1.0); // pass true to the vshader
+		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+	}
 }
-
-
 
 // call drawUnitCylinder using the input from the user
-function createUnitCylinderFromInput() {
+function createCylinderFromInput() {
 	// grab the inputs
 	n = document.getElementById("n").value;
-	console.log("number of sides: " + n);
 	let endcaps = document.getElementById("endcaps").value;
-	console.log("endcaps: " + (endcaps == "True"));
 	drawMode = document.getElementById("mode").value;
 
-	createUnitCylinder(n, endcaps);
+	// create identity matrix
+	let modelMatrix = new Matrix4();
+	// grab the cylinders selection dropdown menu
+	let cylinders = document.getElementById("objnum");
+	// create a new entry for the menu
+	let newCyl = document.createElement("option");
+	newCyl.text = Objects.length.toString();
+	newCyl.value = Objects.length;
+	// add the new entry and switch to it
+	cylinders.add(newCyl);
+	cylinders.value = Objects.length;
+
+	// create new cylinder object and push it into the Objects array
+	cylinder = new Cylinder(n, endcaps, color, modelMatrix);
+	Objects.push(cylinder);
+
+	// apply the user input transformations to the new cylinder
+	transformObj();
 }
 
-function calculateNormals() {
-	//reset arrays
-	vertices = [];
-	polygons = [];
-	normals = [];
-
-	// calculate normals
-	for (i = 0; i < objPolygons.length; i++) {
-		// get the vertices that make up the ith polygon
-		//console.log(objVertices[objPolygons[i][0]])
-		vertex1 = new Vector3(objVertices[objPolygons[i][0]]);
-		vertex2 = new Vector3(objVertices[objPolygons[i][1]]);
-		vertex3 = new Vector3(objVertices[objPolygons[i][2]]);
-		//console.log(vertex1);
-
-		// cross product
-		v1 = new Vector3(vertex2.elements);
-		v1.sub(vertex1);
-		v2 = new Vector3(vertex3.elements);
-		v2.sub(vertex1);
-		normal = Vector3.cross(v1, v2);
-
-		// push into the final arrays (with repetition)
-		for (j = 0; j < vertex1.elements.length; j++){
-		    vertices.push(vertex1.elements[j]);
-		}
-		for (j = 0; j < normal.elements.length; j++)
-			normals.push(normal.elements[j]);
-		polygons.push(3*i);
-
-		for (j = 0; j < vertex2.elements.length; j++)
-		    vertices.push(vertex2.elements[j]);
-		for (j = 0; j < normal.elements.length; j++)
-			normals.push(normal.elements[j]);
-		polygons.push(3*i + 1);
-
-		for (j = 0; j < vertex3.elements.length; j++)
-		    vertices.push(vertex3.elements[j]);
-		for (j = 0; j < normal.elements.length; j++)
-			normals.push(normal.elements[j]);
-		polygons.push(3*i + 2);
-		//polygons.push(3*i);
+// remove a cylinder from the scene
+function removeCylinder() {
+	// remove last option from the selection input
+	// later we refactor the array to match with the remaining nums
+	let objnum = document.getElementById("objnum");
+	if (objnum.value == Objects.length - 1) {
+		objnum.value = Objects.length - 2;
 	}
+	changeSelectedObj();
+
+	objnum.remove(Objects.length - 1);
+
+
+	// remove cylinder from Objects array
+	Objects.splice(objnum.value, 1);
+
+	// redraw
+	drawAll();
 }
 
-// draw a unit cylinder with n-sided circular faces
-function createUnitCylinder(n, endcaps) {
-	// clear the canvas
+// load the selected cylinder's attributes/transformations into the user input
+function changeSelectedObj() {
+	// get the relevant object's number in the Objects array
+	let objnum = document.getElementById("objnum").value;
 
-	gl.clear(gl.COLOR_BUFFER_BIT);
+	// pull values from the cylinder object
+	document.getElementById("rotationx").value = Objects[objnum].transformations[0];
+	document.getElementById("rotationy").value = Objects[objnum].transformations[1];
+	document.getElementById("rotationz").value = Objects[objnum].transformations[2];
+	document.getElementById("scalex").value = Objects[objnum].transformations[3];
+	document.getElementById("scaley").value = Objects[objnum].transformations[4];
+	document.getElementById("scalez").value = Objects[objnum].transformations[5];
+	document.getElementById("translationx").value = Objects[objnum].transformations[6];
+	document.getElementById("translationy").value = Objects[objnum].transformations[7];
+	document.getElementById("translationz").value = Objects[objnum].transformations[8];
+	document.getElementById("color").value = Objects[objnum].colorHex;
+}
 
-	// represent these as 2d arrays for easy reading during bugfixing
-	objVertices = []; // an array of 3D points
-	objPolygons = []; // an array of triangles in terms of 3 points
-	let centerTop = [0.0, 0.0, 1.0];
-	let centerBot = [0.0, 0.0, 0.0];
+// transform the selected cylinder using user input
+function transformObj() {
+	// grab all of the inputs
+	let rotateX = document.getElementById("rotationx").value;
+	let rotateY = document.getElementById("rotationy").value;
+	let rotateZ = document.getElementById("rotationz").value;
+	let scaleX = document.getElementById("scalex").value;
+	let scaleY = document.getElementById("scaley").value;
+	let scaleZ = document.getElementById("scalez").value;
+	let translateX = document.getElementById("translationx").value;
+	let translateY = document.getElementById("translationy").value;
+	let translateZ = document.getElementById("translationz").value;
+	let hex = document.getElementById("color").value;
+	let objnum = document.getElementById("objnum").value;
 
-	// define the n points of each circle using an angle value (theta)
-	// each point of the circles is defined by <cos(theta), sin(theta)>
-	// theta increases by 360/n for each point
-	let theta = 0;
-	for (i = 0; i < n; i++) { 
-		let x = Math.cos(theta);
-		let y = Math.sin(theta);
+	// create transformation matrix
+	let modelMatrix = new Matrix4();
+	modelMatrix.rotate(rotateX, 1, 0, 0);
+	modelMatrix.rotate(rotateY, 0, 1, 0);
+	modelMatrix.rotate(rotateZ, 0, 0, 1);
+	modelMatrix.scale(scaleX / 20, scaleY / 20, scaleZ / 20);
+	modelMatrix.translate(translateX / 100, translateY / 100, translateZ / 100);
 
-		objVertices.push([x, y, 1]);
-		objVertices.push([x, y, 0]);
+	// convert from hex to rgb
+	let color = hexToRGB(hex);
 
-		theta += 2 * Math.PI / n;
-	}
-	// push centerpoints of each circle for endcaps
-	objVertices.push(centerTop);
-	objVertices.push(centerBot);
+	// apply matrix/color
+	Objects[objnum].modelMatrix = modelMatrix;
+	Objects[objnum].transformations = [ //for loading later
+		rotateX, rotateY, rotateZ,
+		scaleX, scaleY, scaleZ,
+		translateX, translateY, translateZ
+	]
+	Objects[objnum].colorHex = hex;
+	Objects[objnum].color = color;
 
-	// draw the cylinder using indices representing triangles
-	// the vertices array is ordered so that every even index is for the top circle
-	// and every odd index is for the bottom circle
-	// 2*n and 2*n + 1 are the centerpoints for the top and bottom circle respectively
-	// i increases by 2 each loop
-	for (i = 0; i < 2*(n - 1); i+=2) {
-		objPolygons.push([i, i + 1, i + 2]); // top vertex, bot vertex, next top vertex (facing side)
-		objPolygons.push([i + 1, i + 3, i + 2]); // bot vertex, next bot vertex, next top vertex (facing side)
-		if (endcaps == "True") { //endcaps:
-			objPolygons.push([i, i + 2, 2*n]); // top vertex, next top vertex, top center (facing top)
-			objPolygons.push([2*n + 1, i + 3, i + 1]); // bot center, next bot vertex, bot vertex (facing bottom)
+	// redraw
+	drawAll();
+}
+
+// converts #RRGGBB into [r, g, b]
+// for 0.0 <= r,g,b <= 1.0
+function hexToRGB(hex) {
+	result = [0, 0, 0]; // [r, g, b]
+	nums = []; // numbers of the hex chars in order #RRGGBB
+
+	for (let i = 0; i < 6; i++) {
+		switch (hex[i + 1]) {
+			case "a":
+				nums[i] = 10;
+				break;
+			case "b":
+				nums[i] = 11;
+				break;
+			case "c":
+				nums[i] = 12;
+				break;
+			case "d":
+				nums[i] = 13;
+				break;
+			case "e":
+				nums[i] = 14;
+				break;
+			case "f":
+				nums[i] = 15;
+				break;
+			default:
+				nums[i] = parseInt(hex[i + 1]);
 		}
 	}
-	// connect the final 2 vertices of the circles
-	// (involves wrapping around the arrays)
-	objPolygons.push([2*n - 2, 2*n - 1, 0]); // top vertex, bot vertex, next top vertex (facing side)
-	objPolygons.push([2*n - 1, 1, 0]); // bot vertex, next bot vertex, next top vertex (facing side)
-	if (endcaps == "True") { //final endcaps:
-		objPolygons.push([2*n - 2, 0, 2*n]); // top vertex, next top vertex, top center (facing top)
-		objPolygons.push([2*n + 1, 1, 2*n - 1]); // bot center, next bot vertex, bot vertex (facing bottom)
-	}
 
-	//console.log(vertices);
-	//console.log(polygons);
+	result[0] = (nums[0] * 16 + nums[1]) / 255;
+	result[1] = (nums[2] * 16 + nums[3]) / 255;
+	result[2] = (nums[4] * 16 + nums[5]) / 255;
 
-	
-	// draw
-	if (drawMode == "WireFrame")
-		drawWireframe(objVertices, objPolygons);
-	else{
-		//calculate normals
-		calculateNormals();
-		drawSolid(vertices, polygons, normals);
-	}
-
-	// print the # of vertices
-	console.log("number of vertices: " + (2*n + 2));
-	// print the # of triangles
-	console.log("number of triangles: " + (4*n));
+	return result
 }
 
 // save .coor and .poly files for the given vertices and polygons
+// currently only works for one cylinder without transformations
 function saveObj() {
 	let filenameCoor = "cylinder" + n + ".coor";
 	let filenamePoly = "cylinder" + n + ".poly";
@@ -396,7 +452,7 @@ function saveObj() {
 	let coorData = "#" + filenameCoor + "\n"
 	coorData += objVertices.length + "\n"
 	for (i = 0; i < objVertices.length; i++) {
-		coorData += (i+1) + ", " + objVertices[i][0] + ", " + objVertices[i][1] + ", " + objVertices[i][2] + "\n";
+		coorData += (i + 1) + ", " + objVertices[i][0] + ", " + objVertices[i][1] + ", " + objVertices[i][2] + "\n";
 	}
 
 	//console.log(coorData);
@@ -416,7 +472,7 @@ function saveObj() {
 	let polyData = "#" + filenamePoly + "\n"
 	polyData += objPolygons.length + "\n"
 	for (i = 0; i < objPolygons.length; i++) {
-		polyData += "tri" + (i+1) + " " + objPolygons[i][0] + " " + objPolygons[i][1] + " " + objPolygons[i][2] + "\n";
+		polyData += "tri" + (i + 1) + " " + objPolygons[i][0] + " " + objPolygons[i][1] + " " + objPolygons[i][2] + "\n";
 	}
 
 	//console.log(polyData);
