@@ -210,21 +210,32 @@ var FSHADER = `
 `;
 
 // GLOBAL VARIABLES
-// vertex depth of the cylinders
-let n = 0;
-// construction arrays
-let Objects = [];
-let objVertices = []; // without repetition
-let objPolygons = [];
+Objects = [];
 
-// final arrays
-let vertices = []; // with repetition for normals
-let normals = [];
-let polygons = [];
+// For Drawing
+let normals;
+let vertices;
+let indices;
+
+let u_ModelMatrix;
+let u_NormalMatrix;
+let u_ViewMatrix;
+let u_ProjMatrix;
+let u_ShadingType;
+
+let indicesBuffer;
+let vertexBuffer;
+let normalBuffer;
+
+// Matrices
+let viewMatrix;
+let projMatrix;
+let normalMatrix;
 
 // Light Variables
 let lightDirection = [-1.0, 1.0, -1.0];
 let lightPoint = [0.0, 0.0, 0.0];
+let sphere;
 
 // Camera Variables
 let cam;
@@ -234,7 +245,8 @@ let eyePosition = [0.0, 0.0, 3.0];
 let animationPoints = [[0.0, 0.0, 3.0],
                        [3.0, 1.0, 0.0],
 					   [0.0, 2.0, -3.0],
-					   [-3.0, 1.0, 0.0]];
+					   [-3.0, 1.0, 0.0],
+					   [0.0, 0.0, 3.0]];
 let animationPosition = 0;
 let t = 0;
 
@@ -288,6 +300,11 @@ function main() {
 
 	// init camera
 	cam = new Camera();
+	viewMatrix = new Matrix4();
+	projMatrix = new Matrix4();
+	normalMatrix = new Matrix4();
+	sphereModel = new Matrix4();
+	sphere = new Sphere(10, 0.05, [1.0, 1.0, 1.0], sphereModel);
 	
 	drawPowerLines(); // draw my custom model
 
@@ -299,10 +316,27 @@ function main() {
 	cylinders.add(newCyl);
 	cylinders.value = Objects.length;
 
-	let sphereModel = new Matrix4();
-	let sphere = new Sphere(10, 0.25, [1.0, 1.0, 1.0], sphereModel);
+	let sphereModel2 = new Matrix4();
+	let sphere2 = new Sphere(10, 0.25, [1.0, 1.0, 1.0], sphereModel2);
 	sphere.colorHex = "#FFFFFF";
-	Objects.push(sphere);
+	Objects.push(sphere2);
+
+	// create transformation matrices from object data
+	u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
+	u_NormalMatrix = gl.getUniformLocation(gl.program, "u_NormalMatrix");
+	u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
+	u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
+
+	// create indices buffer in gpu
+	indicesBuffer = gl.createBuffer();
+	if (!indicesBuffer) {
+		console.log("Failed to create buffer");
+		return false;
+	}
+	// init array buffers
+	vertexBuffer = initBuffer("a_Position", 3);
+	normalBuffer = initBuffer("a_Normal", 3);
+	u_ShadingType = gl.getUniformLocation(gl.program, "u_ShadingType");
 	
 	drawAll();
 	changeSelectedObj();
@@ -355,7 +389,7 @@ window.addEventListener("keydown", function(event) {
 			break;
 		case "r":
 			// reset camera
-			cam = new Camera();
+			cam.reset();;
 			break;
 	}
 });
@@ -418,38 +452,71 @@ function loadPoint() {
 	document.getElementById("animZ").value = animationPoints[selectedPoint][2];
 }
 
+function addPoint() {
+	let points = document.getElementById("animPoint");
+	let p = document.createElement("option");
+	p.text = animationPoints.length.toString();
+	p.value = animationPoints.length;
+	// add the new entry and switch to it
+	points.add(p);
+	points.value = animationPoints.length;
+
+	animationPoints[animationPoints.length] = [0, 0, 0];
+	loadPoint();
+}
+
 // animation involving linear interpolation between points
 function linearAnimation() {
-	cam.center.set(new Vector3([0.0, 0.0, 0.0]))
+	cam.center.elements = [0.0, 0.0, 0.0];
 	t += 0.01; // speed of animation
 	if (t <= 1) {
-		if (animationPosition == animationPoints.length - 1) {
-			cam.eye.elements[0] = animationPoints[animationPosition][0] + t * (animationPoints[0][0] - animationPoints[animationPosition][0]);
-			cam.eye.elements[1] = animationPoints[animationPosition][1] + t * (animationPoints[0][1] - animationPoints[animationPosition][1]);
-			cam.eye.elements[2] = animationPoints[animationPosition][2] + t * (animationPoints[0][2] - animationPoints[animationPosition][2]);
-		} else {
-			cam.eye.elements[0] = animationPoints[animationPosition][0] + t * (animationPoints[animationPosition + 1][0] - animationPoints[animationPosition][0]);
-			cam.eye.elements[1] = animationPoints[animationPosition][1] + t * (animationPoints[animationPosition + 1][1] - animationPoints[animationPosition][1]);
-			cam.eye.elements[2] = animationPoints[animationPosition][2] + t * (animationPoints[animationPosition + 1][2] - animationPoints[animationPosition][2]);
-		}
+		cam.eye.elements[0] = animationPoints[animationPosition][0] + t * (animationPoints[animationPosition + 1][0] - animationPoints[animationPosition][0]);
+		cam.eye.elements[1] = animationPoints[animationPosition][1] + t * (animationPoints[animationPosition + 1][1] - animationPoints[animationPosition][1]);
+		cam.eye.elements[2] = animationPoints[animationPosition][2] + t * (animationPoints[animationPosition + 1][2] - animationPoints[animationPosition][2]);
 	} else {
 		t = 0;
-		if (animationPosition == animationPoints.length - 1)
+		if (animationPosition == animationPoints.length - 2)
 			animationPosition = 0;
 		else
 			animationPosition++;
 	}
 }
 
+// simple choose function
+function choose(n, k) {
+	if (k == 0) return 1;
+	return (n * choose(n - 1, k - 1)) / k;
+}
+
 // similar animation as above but with cubic curve interpolation
+// De Casteljau's Algorithm
 function cubicAnimation() {
-	cam.center.set(new Vector3([0.0, 0.0, 0.0]))
-	t += 0.01; // speed of animation
+	cam.center.elements = [0.0, 0.0, 0.0];
+	t += 0.0025; // speed of animation
+
+	let x = 0; 
+	let y = 0;
+	let z = 0;
+
+	if (t <= 1) {
+		let n = animationPoints.length - 1;
+		for (let i = 0; i <= n; ++i) {
+			x += animationPoints[i][0] * choose(n, i) * Math.pow((1 - t), n - i) * Math.pow(t, i);
+			y += animationPoints[i][1] * choose(n, i) * Math.pow((1 - t), n - i) * Math.pow(t, i);
+			z += animationPoints[i][2] * choose(n, i) * Math.pow((1 - t), n - i) * Math.pow(t, i);
+		}
+		cam.eye.elements[0] = x;
+		cam.eye.elements[1] = y;
+		cam.eye.elements[2] = z;
+	} else {
+		t = 0;
+	}
 }
 
 // set light direction/color
 // and toggle different light effects
 function defineLightParameters() {
+	drawModeGlobal = document.getElementById("mode").value;
 
 	// grab variables from shaders
 	let u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
@@ -489,6 +556,12 @@ function defineLightParameters() {
 	gl.uniform1f(u_DiffuseOn, (document.getElementById("DiffuseLighting").checked) ? 1.0 : 0.0);
 	gl.uniform1f(u_AmbientOn, (document.getElementById("AmbientLighting").checked) ? 1.0 : 0.0);
 	gl.uniform1f(u_SpecularOn, (document.getElementById("SpecularLighting").checked) ? 1.0 : 0.0);
+
+	// Sphere to represent point light
+	if (document.getElementById("PointLighting").checked) {
+		sphere.modelMatrix.setTranslate(lightPoint[0], lightPoint[1], lightPoint[2]);
+		draw(sphere, "WireFrame");
+	}
 }
 
 // draw my custom model
@@ -521,7 +594,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(0, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.1, 0.1, 1.5);
-	modelMatrix.translate(0, 1, 0);
+	modelMatrix.translate(0, -4, 0);
 	let cylinder1 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder1.colorHex = "#5c4033"
 	cylinder1.transformations = [
@@ -538,7 +611,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(90, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.05, 0.05, 1);
-	modelMatrix.translate(0, 13, 0);
+	modelMatrix.translate(5, 13, 0);
 	let cylinder2 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder2.colorHex = "#5c4033";
 	cylinder2.transformations = [
@@ -554,7 +627,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(90, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.05, 0.05, 1);
-	modelMatrix.translate(0, 8, 0);
+	modelMatrix.translate(5, 8, 0);
 	let cylinder3 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder3.colorHex = "#5c4033";
 	cylinder3.transformations = [
@@ -570,7 +643,7 @@ function drawPowerLines() {
 	modelMatrix.rotate(0, 0, 1, 0);
 	modelMatrix.rotate(0, 0, 0, 1);
 	modelMatrix.scale(0.1, 0.1, 0.3);
-	modelMatrix.translate(2, -0.5, -0.5);
+	modelMatrix.translate(2, -3.5, 0.0);
 	let cylinder4 = new Cylinder(n, endcaps, color, modelMatrix);
 	cylinder4.colorHex = "#808080";
 	cylinder4.transformations = [
@@ -591,21 +664,12 @@ function drawAll() {
 	// clear screen
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	// set global drawmode variable
-	drawModeGlobal = document.getElementById("mode").value;
 
 	defineLightParameters();
 
 	// draw each object in the objects array
 	for (let obj of Objects) {
 		draw(obj, drawModeGlobal);
-	}
-
-	// Sphere to represent point light
-	if (document.getElementById("PointLighting").checked) {
-		let sphereModel = new Matrix4();
-		sphereModel.translate(lightPoint[0], lightPoint[1], lightPoint[2]);
-		let sphere = new Sphere(10, 0.05, [1.0, 1.0, 1.0], sphereModel);
-		draw(sphere, "WireFrame");
 	}
 	
 	// handle animation mode
@@ -624,53 +688,34 @@ function drawAll() {
 function draw(obj, drawMode) {
 	// define in cpuvertices/normals/indices differently
 	// depending on smooth vs flat shading.
-	let normals;
-	let vertices;
-	let indices;
 	if (drawMode == "Gouraud" || drawMode == "Phong" || drawMode == "WireFrame") {
-		vertices = new Float32Array(obj.verticesSmooth);
-		normals = new Float32Array(obj.normalsVertex);
-		indices = new Uint16Array(obj.polygonsSmooth);
+		vertices = obj.verticesSmooth;
+		normals = obj.normalsVertex;
+		indices = obj.polygonsSmooth;
 	} else {
-		vertices = new Float32Array(obj.verticesFlat);
-		normals = new Float32Array(obj.normalsFlat);
-		indices = new Uint16Array(obj.polygonsFlat);
-	}
-
-	// create indices buffer in gpu
-	let indicesBuffer = gl.createBuffer();
-	if (!indicesBuffer) {
-		console.log("Failed to create buffer");
-		return false;
+		vertices = obj.verticesFlat;
+		normals = obj.normalsFlat;
+		indices = obj.polygonsFlat;
 	}
 
 	// set fragment shader color
 	defineFragColor(obj.color);
 
-	// create transformation matrices from object data
-	let u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
-	let u_NormalMatrix = gl.getUniformLocation(gl.program, "u_NormalMatrix");
-	let u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
-	let u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
-
 	//Model Matrix (stored in object)
 	gl.uniformMatrix4fv(u_ModelMatrix, false, obj.modelMatrix.elements);
 
 	// Normal Matrix
-	normalMatrix = new Matrix4(); //normalMatrix = inverse transpose of modelMatrix
 	normalMatrix.setInverseOf(obj.modelMatrix);
 	normalMatrix.transpose();
 	gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
 
 	// View Matrix
-	let viewMatrix = new Matrix4();
 	viewMatrix.setLookAt(cam.eye.elements[0], cam.eye.elements[1], cam.eye.elements[2], 
 		                 cam.center.elements[0], cam.center.elements[1], cam.center.elements[2], // center: [0, 0, 0]
 						 0, 1, 0);// vector that defines "up": [0, 1, 0]
 	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
 
 	// Projection Matrix
-	let projMatrix = new Matrix4();
 	// which projection type?
 	let zoom = document.getElementById("zoom").value;
 	if (document.getElementById("proj").value == "Perspective"){
@@ -679,10 +724,6 @@ function draw(obj, drawMode) {
 		projMatrix.setOrtho(-1/60 * zoom, 1/60 * zoom, -1/60 * zoom, 1/60 * zoom, 0.1, 1000); // more magic numbers
 	}
 	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
-
-	// init array buffers
-	let vertexBuffer = initBuffer("a_Position", 3);
-	let normalBuffer = initBuffer("a_Normal", 3);
 
 	// send data from cpu arrays
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -697,7 +738,6 @@ function draw(obj, drawMode) {
 	// 1.0 = flat shading
 	// 2.0 = gouraud
 	// 3.0 = phong (unimplemented)
-	let u_ShadingType = gl.getUniformLocation(gl.program, "u_ShadingType");
 	if (drawMode == "WireFrame") {
 		gl.uniform1f(u_ShadingType, 0.0);
 		gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
@@ -821,7 +861,7 @@ function transformObj() {
 	let objnum = document.getElementById("objnum").value;
 
 	// create transformation matrix
-	let modelMatrix = new Matrix4();
+	modelMatrix.setIdentity();
 	modelMatrix.rotate(rotateX, 1, 0, 0);
 	modelMatrix.rotate(rotateY, 0, 1, 0);
 	modelMatrix.rotate(rotateZ, 0, 0, 1);

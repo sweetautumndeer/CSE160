@@ -2,13 +2,14 @@
 // Autumn Moulios ~ 4/25/2021 ~ CSE 160
 // amoulios
 // 
-// Assignment 3
-// Smooth Lighting
+// Assignment 4
+// Camera Movement
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Cylinder {
 
 	verticesFlat;
+
 	verticesSmooth;
 	polygonsFlat;
 	polygonsSmooth;
@@ -166,5 +167,13 @@ class Cylinder {
 			this.polygonsSmooth.push(objPolygons[i][1]);
 			this.polygonsSmooth.push(objPolygons[i][2]);
 		}
+
+
+		this.verticesFlat = new Float32Array(this.verticesFlat);
+		this.verticesSmooth = new Float32Array(this.verticesSmooth);
+		this.polygonsFlat = new Uint16Array(this.polygonsFlat);
+		this.polygonsSmooth = new Uint16Array(this.polygonsSmooth);
+		this.normalsFlat = new Float32Array(this.normalsFlat);
+		this.normalsVertex = new Float32Array(this.normalsVertex);
 	}
 }

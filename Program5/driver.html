@@ -1,0 +1,85 @@
+<!--
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Autumn Moulios ~ Ethan Nguyen ~ 4/25/2021 ~ CSE 160
+// amoulios
+// etqnguye
+// 
+// Assignment 4
+// Camera Movement
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Program 5: Three.js</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<script src="three.js-master/build/three.js"></script>
+		<script>
+
+            let scene, camera, renderer, cube, bulb, lightMaterial;
+
+			init();
+            animate();
+            
+            function init() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+                renderer = new THREE.WebGLRenderer();
+                renderer.physicallyCorrectLights = true;
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				renderer.shadowMap.enabled = true;
+				renderer.toneMapping = THREE.ReinhardToneMapping;
+				renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                document.body.appendChild( renderer.domElement );
+
+                const geometry = new THREE.BoxGeometry();
+                const material = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
+                cube = new THREE.Mesh( geometry, material );
+                scene.add( cube );
+
+                camera.position.z = 5;
+
+                // lighting
+                lightGeometry = new THREE.SphereGeometry(0.1, 16, 8);
+                bulb = new THREE.PointLight(0xffffff, 1, 200, 2);
+                lightMaterial = new THREE.MeshStandardMaterial( {
+                    emissive: 0xffffee,
+                    emissiveIntensity: 1,
+                    color: 0x00000
+                } );
+                bulb.add(new THREE.Mesh(lightGeometry, lightMaterial));
+                bulb.position.set(0, 2, 2);
+                bulb.castShadow = true;
+                scene.add(bulb);
+            }
+
+            function animate() {
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+
+	            requestAnimationFrame( animate );
+	            render();
+            }
+
+            function render() {
+                renderer.toneMappingExposure = Math.pow(0.68, 5.0); // to allow for very bright scenes.
+				renderer.shadowMap.enabled = true;
+				bulb.castShadow = true;
+
+				bulb.power = 400;
+				lightMaterial.emissiveIntensity = bulb.intensity / Math.pow(0.02, 2.0); // convert from intensity to irradiance at bulb surface
+                
+                renderer.render( scene, camera );
+            }
+            
+		</script>
+	</body>
+</html>

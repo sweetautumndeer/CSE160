@@ -17,18 +17,29 @@
 	
 	<body bgcolor="#e0e0e0">
         Autumn Moulios (amoulios) </br>
-        CSE 160 Programming Assignment 3 </br>
-        5/9/2021 </br>
+        CSE 160 Programming Assignment 4 </br>
+        5/23/2021 </br>
         </br>
-        <a href="driver.html">Assignment 3 Driver HTML Page</a></br>
-        <a href="asg3.js">Javascript Code</a></br>
+        <a href="driver.html">Assignment 4 Driver HTML Page</a></br>
+        <a href="asg4.js">Javascript Code</a></br>
         <a href="cylinder.js">Cylinder Class</a> 
         <a href="sphere.js">Sphere Class</a>
+        <a href="camera.js">Camera Class</a>
         </br></br>
         By default my power lines model is displayed in the 3D scene, and can be edited using the ui.</br>
         There's also a sphere in the scene to more easily see lighting effects.</br>
         A wireframe sphere is used to represent the point light.</br>
         <img src="Model.PNG"></img></br>
+        </br>
+        Camera Movement: </br>
+        The camera's position can be controlled used the W, A, S, and D keys for moving forward, left, backward, and right respectively. </br>
+        The shift and control keys will also move the camera up and down respectively (regardless of the camera's looking direction). </br>
+        The camera can be tilted/panned by clicking on the canvas and dragging. </br>
+        There's a slider to affect the zoom of the camera. </br>
+        A dropdown menu allows an automatic camera movement animation to be played (cubic, linear, or none). </br>
+        The points used for this animation can edited using the Animation Point Value number inputs, and different ones are selected using the Animation Point dropdown menu. </br>
+        The "Create Point" button will append a new point to the animation at [0, 0, 0], which can then be edited. </br>     
+        <img src="Camera.PNG"></img></br>
         </br>
         Lighting:</br>
         There are four Draw Modes: WireFrame (No Shading), and Solid (Flat Shading), Gouraud (Smooth Shading), and Phong (Smooth Shading). These affect the whole scene when chosen. </br>

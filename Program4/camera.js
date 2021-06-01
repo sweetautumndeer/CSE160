@@ -22,6 +22,12 @@ class Camera {
         this.up = new Vector3([0, 1, 0]);
     }
 
+    reset() {
+        this.eye.elements = [0.0, 0.0, 3.0];
+        this.center.elements = [0.0, 0.0, 0.0];
+        this.up.elements = [0.0, 1.0, 0.0];
+    }
+
     moveForward() {
         let forward = new Vector3(this.center.elements);
         forward.sub(this.eye);
