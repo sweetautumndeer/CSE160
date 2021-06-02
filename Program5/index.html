@@ -30,6 +30,27 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             }
 
+            function getBase64FromImageUrl(url) {
+                var img = new Image();
+
+                img.setAttribute('crossOrigin', 'anonymous');
+
+                img.onload = function () {
+                    var canvas = document.createElement("canvas");
+                    canvas.width =this.width;
+                    canvas.height =this.height;
+
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(this, 0, 0);
+
+                    var dataURL = canvas.toDataURL("image/png");
+
+                    alert(dataURL.replace(/^data:image\/(png|jpg);base64,/, ""));
+                };
+
+                img.src = url;
+            }
+
 			init();
             window.addEventListener('resize', onWindowResize, false);
             animate(); //hey 2
@@ -47,7 +68,7 @@
 
                 // camera setup
                 scene = new THREE.Scene();
-                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 2000);
+                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 20000);
                 controls = new THREE.OrbitControls(camera, renderer.domElement);
                 camera.position.z = 5;
                 controls.update();
@@ -80,15 +101,16 @@
                 bulb.position.set(0, 2, 2);
                 bulb.castShadow = true;
                 scene.add(bulb);
+                
 
                 // skybox
                 let materialArray = [];
-                let texture_ft = new THREE.TextureLoader().load( 'corona_ft.jpg');
-                let texture_bk = new THREE.TextureLoader().load( 'corona_bk.jpg');
-                let texture_up = new THREE.TextureLoader().load( 'corona_up.jpg');
-                let texture_dn = new THREE.TextureLoader().load( 'corona_dn.jpg');
-                let texture_rt = new THREE.TextureLoader().load( 'corona_rt.jpg');
-                let texture_lf = new THREE.TextureLoader().load( 'corona_lf.jpg');
+                let texture_ft = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_ft.png');
+                let texture_bk = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_bk.png');
+                let texture_up = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_up.png');
+                let texture_dn = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_dn.png');
+                let texture_rt = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_rt.png');
+                let texture_lf = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_lf.png');
 
                 materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
                 materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
