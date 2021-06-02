@@ -19,18 +19,23 @@
 		</style>
 	</head>
 	<body>
-		<script src="three.js-master/build/three.js"></script>
+		<script src="../lib/three.js"></script>
+        <script src="../lib/OrbitControls.js"></script>
 		<script>
+            let scene, camera, controls, renderer, cube, bulb, lightMaterial;
 
-            let scene, camera, renderer, cube, bulb, lightMaterial;
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
 
 			init();
+            window.addEventListener('resize', onWindowResize, false);
             animate(); //hey 2
             
             function init() {
-                scene = new THREE.Scene();
-                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
+                // rendering settings
                 renderer = new THREE.WebGLRenderer();
                 renderer.physicallyCorrectLights = true;
 				renderer.outputEncoding = THREE.sRGBEncoding;
@@ -40,25 +45,46 @@
                 renderer.setSize( window.innerWidth, window.innerHeight );
                 document.body.appendChild( renderer.domElement );
 
-                const geometry = new THREE.BoxGeometry();
-                const material = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
-                cube = new THREE.Mesh( geometry, material );
-                scene.add( cube );
-
+                // camera setup
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
                 camera.position.z = 5;
+                controls.update();
+
+                // cube
+                const cubeGeometry = new THREE.SphereGeometry(1, 15, 15);
+                const cubeMaterial = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+                cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cube.castShadow = true;
+                scene.add(cube);
+
+                // plane
+                const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+                const planeMaterial = new THREE.MeshPhongMaterial({color: 0xff0000});
+                plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.receiveShadow = true;
+                plane.rotation.x = - Math.PI / 2;
+                plane.position.y = -1;
+                scene.add(plane);
 
                 // lighting
-                lightGeometry = new THREE.SphereGeometry(0.1, 16, 8);
+                lightGeometry = new THREE.SphereGeometry(0.02, 16, 16);
                 bulb = new THREE.PointLight(0xffffff, 1, 200, 2);
-                lightMaterial = new THREE.MeshStandardMaterial( {
+                lightMaterial = new THREE.MeshPhongMaterial( {
                     emissive: 0xffffee,
                     emissiveIntensity: 1,
-                    color: 0x00000
+                    color: 0x000000
                 } );
                 bulb.add(new THREE.Mesh(lightGeometry, lightMaterial));
                 bulb.position.set(0, 2, 2);
                 bulb.castShadow = true;
                 scene.add(bulb);
+
+                // skybox
+
+                const ambient = new THREE.AmbientLight(0x404040);
+                scene.add(ambient);
             }
 
             function animate() {
