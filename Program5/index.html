@@ -21,9 +21,12 @@
 	<body>
 		<script src="../lib/three.js"></script>
         <script src="../lib/OrbitControls.js"></script>
-		<script>
+		<script type="module">
+            import { Water } from './three.js-master/examples/jsm/objects/Water.js';
+
             let scene, camera, controls, renderer, bulb, lightMaterial;
-            let planet1, planet2, planet3;
+            let plane, planet1, planet2, planet3;
+            let water;
             let t = 0;
 
             function onWindowResize() {
@@ -74,7 +77,8 @@
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 30000);
                 controls = new THREE.OrbitControls(camera, renderer.domElement);
-                camera.position.z = 25;
+                camera.position.z = 50;
+                camera.position.y = 25;
                 controls.update();
 
                 const textureLoader = new THREE.TextureLoader();
@@ -109,7 +113,7 @@
                 planet2.receiveShadow = true;
                 scene.add(planet2);
 
-                // cube
+                // planet3
                 const planet3Geometry = new THREE.SphereGeometry(0.25, 15, 15);
                 const planet3Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
                 planet3 = new THREE.Mesh(planet3Geometry, planet3Material);
@@ -117,17 +121,29 @@
                 planet3.receiveShadow = true;
                 scene.add(planet3);
 
-                // plane
-                const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-                const planeMaterial = new THREE.MeshPhongMaterial({color: 0xff0000});
-                plane = new THREE.Mesh(planeGeometry, planeMaterial);
-                plane.receiveShadow = true;
-                plane.rotation.x = - Math.PI / 2;
-                plane.position.y = -1;
-                //scene.add(plane);
+                // water
+                const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+
+                water = new Water(
+                    waterGeometry,
+                    {
+                        textureWidth: 512,
+                        textureHeight: 512,
+                        waterNormals: new THREE.TextureLoader().load('three.js-master/examples/textures/waternormals.jpg', function (texture) {
+                            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                        }),
+
+						waterColor: 0xffffff,
+						distortionScale: 10,
+						fog: scene.fog !== undefined
+                    }
+                )
+                water.rotation.x = - Math.PI / 2;
+                water.position.y = -10;
+                scene.add(water);
 
                 // lighting
-                lightGeometry = new THREE.SphereGeometry(5, 16, 16);
+                const lightGeometry = new THREE.SphereGeometry(5, 16, 16);
                 bulb = new THREE.PointLight(0xffffff, 1, 200, 0.1);
                 lightMaterial = new THREE.MeshPhongMaterial( {
                     emissive: 0xffffee,
@@ -194,6 +210,8 @@
                 planet3.position.z = 7 * Math.sin(4 * Math.PI * t);
                 planet3.position.y = 2 * Math.cos(Math.PI * t);
                 planet3.rotation.y += 0.01;
+
+                water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
             }
 
             function render() {
