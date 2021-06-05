@@ -22,7 +22,9 @@
 		<script src="../lib/three.js"></script>
         <script src="../lib/OrbitControls.js"></script>
 		<script>
-            let scene, camera, controls, renderer, cube, bulb, lightMaterial;
+            let scene, camera, controls, renderer, bulb, lightMaterial;
+            let planet1, planet2, planet3;
+            let t = 0;
 
             function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -51,9 +53,11 @@
                 img.src = url;
             }
 
+            // create objects
 			init();
-            window.addEventListener('resize', onWindowResize, false);
-            animate(); //hey 2
+            // resize window when necessary
+            window.addEventListener('resize', onWindowResize, false); 
+            animate();
             
             function init() {
                 // rendering settings
@@ -68,17 +72,34 @@
 
                 // camera setup
                 scene = new THREE.Scene();
-                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 20000);
+                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 30000);
                 controls = new THREE.OrbitControls(camera, renderer.domElement);
-                camera.position.z = 5;
+                camera.position.z = 25;
                 controls.update();
 
+                // planet1
+                const planet1Geometry = new THREE.SphereGeometry(0.5, 15, 15);
+                const planet1Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+                planet1 = new THREE.Mesh(planet1Geometry, planet1Material);
+                planet1.castShadow = true;
+                planet1.receiveShadow = true;
+                scene.add(planet1);
+
                 // cube
-                const cubeGeometry = new THREE.SphereGeometry(1, 15, 15);
-                const cubeMaterial = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
-                cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-                cube.castShadow = true;
-                scene.add(cube);
+                const planet2Geometry = new THREE.SphereGeometry(0.75, 15, 15);
+                const planet2Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+                planet2 = new THREE.Mesh(planet2Geometry, planet2Material);
+                planet2.castShadow = true;
+                planet2.receiveShadow = true;
+                scene.add(planet2);
+
+                // cube
+                const planet3Geometry = new THREE.SphereGeometry(0.25, 15, 15);
+                const planet3Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+                planet3 = new THREE.Mesh(planet3Geometry, planet3Material);
+                planet3.castShadow = true;
+                planet3.receiveShadow = true;
+                scene.add(planet3);
 
                 // plane
                 const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
@@ -87,18 +108,18 @@
                 plane.receiveShadow = true;
                 plane.rotation.x = - Math.PI / 2;
                 plane.position.y = -1;
-                scene.add(plane);
+                //scene.add(plane);
 
                 // lighting
-                lightGeometry = new THREE.SphereGeometry(0.02, 16, 16);
-                bulb = new THREE.PointLight(0xffffff, 1, 200, 2);
+                lightGeometry = new THREE.SphereGeometry(5, 16, 16);
+                bulb = new THREE.PointLight(0xffffff, 1, 200, 0.1);
                 lightMaterial = new THREE.MeshPhongMaterial( {
                     emissive: 0xffffee,
                     emissiveIntensity: 1,
                     color: 0x000000
                 } );
                 bulb.add(new THREE.Mesh(lightGeometry, lightMaterial));
-                bulb.position.set(0, 2, 2);
+                bulb.position.set(0, 0, 0);
                 bulb.castShadow = true;
                 scene.add(bulb);
                 
@@ -131,11 +152,32 @@
             }
 
             function animate() {
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.01;
+                // increase variable for calculations later
+                if (t == 1) t = 0;
+                t += 0.001;
 
 	            requestAnimationFrame( animate );
+                calculatePlanetOrbits();
 	            render();
+            }
+
+            function calculatePlanetOrbits() {
+                planet1.position.x = 25 * Math.cos(1 * Math.PI * t + 1);
+                planet1.position.z = 25 * Math.sin(1 * Math.PI * t + 1);
+                planet1.position.y = Math.cos(0.5 * Math.PI * t);
+                planet1.rotation.y += 0.01;
+
+                //camera.lookAt(planet1.position.x, planet1.position.y, planet1.position.z);
+
+                planet2.position.x = 13 * Math.cos(3 * Math.PI * t);
+                planet2.position.z = 13 * Math.sin(3 * Math.PI * t);
+                planet2.position.y = 0;
+                planet2.rotation.y += 0.01;
+
+                planet3.position.x = 7 * Math.cos(4 * Math.PI * t);
+                planet3.position.z = 7 * Math.sin(4 * Math.PI * t);
+                planet3.position.y = 2 * Math.cos(Math.PI * t);
+                planet3.rotation.y += 0.01;
             }
 
             function render() {
