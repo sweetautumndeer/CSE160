@@ -80,16 +80,33 @@
                 camera.position.z = 50;
                 camera.position.y = 25;
                 controls.update();
-
+                
+                //load textures
                 const textureLoader = new THREE.TextureLoader();
 
-                // planet1
+                //planet1 texture
+
+                let planet1Material = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+					roughness: 0.5,
+					metalness: 1.0
+				} );
+                textureLoader.load( './three.js-master/ulukai/2k_neptune.jpg', function ( map ) {
+                    map.anisotropy = 4;
+                    map.encoding = THREE.sRGBEncoding;
+                    planet1Material.map = map;
+                    planet1Material.needsUpdate = true;
+
+                } );
+
+                // planet1 
                 const planet1Geometry = new THREE.SphereGeometry(0.5, 15, 15);
-                const planet1Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
                 planet1 = new THREE.Mesh(planet1Geometry, planet1Material);
                 planet1.castShadow = true;
                 planet1.receiveShadow = true;
                 scene.add(planet1);
+
+                //planet2 texture
 
                 let planet2Material = new THREE.MeshStandardMaterial( {
 					color: 0xffffff,
@@ -104,18 +121,30 @@
 
                 } );
 
-                // cube
+                // planet2
                 const planet2Geometry = new THREE.SphereGeometry(0.75, 15, 15);
-                // var texture = new THREE.TextureLoader().load('./three.js-master/ulukai/2k_makemake_fictional.jpg');
-                // const planet2Material = new THREE.MeshBasicMaterial({map : texture, overdraw: 0.1});
                 planet2 = new THREE.Mesh(planet2Geometry, planet2Material);
                 planet2.castShadow = true;
                 planet2.receiveShadow = true;
                 scene.add(planet2);
 
+                //planet3 texture
+
+                let planet3Material = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+					roughness: 0.5,
+					metalness: 1.0
+				} );
+                textureLoader.load( './three.js-master/ulukai/2k_haumea_fictional.jpg', function ( map ) {
+                    map.anisotropy = 4;
+                    map.encoding = THREE.sRGBEncoding;
+                    planet2Material.map = map;
+                    planet2Material.needsUpdate = true;
+
+                } );
+
                 // planet3
                 const planet3Geometry = new THREE.SphereGeometry(0.25, 15, 15);
-                const planet3Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
                 planet3 = new THREE.Mesh(planet3Geometry, planet3Material);
                 planet3.castShadow = true;
                 planet3.receiveShadow = true;
