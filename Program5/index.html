@@ -77,6 +77,8 @@
                 camera.position.z = 25;
                 controls.update();
 
+                const textureLoader = new THREE.TextureLoader();
+
                 // planet1
                 const planet1Geometry = new THREE.SphereGeometry(0.5, 15, 15);
                 const planet1Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
@@ -85,9 +87,23 @@
                 planet1.receiveShadow = true;
                 scene.add(planet1);
 
+                let planet2Material = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+					roughness: 0.5,
+					metalness: 1.0
+				} );
+                textureLoader.load( './three.js-master/ulukai/2k_makemake_fictional.jpg', function ( map ) {
+                    map.anisotropy = 4;
+                    map.encoding = THREE.sRGBEncoding;
+                    planet2Material.map = map;
+                    planet2Material.needsUpdate = true;
+
+                } );
+
                 // cube
                 const planet2Geometry = new THREE.SphereGeometry(0.75, 15, 15);
-                const planet2Material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+                // var texture = new THREE.TextureLoader().load('./three.js-master/ulukai/2k_makemake_fictional.jpg');
+                // const planet2Material = new THREE.MeshBasicMaterial({map : texture, overdraw: 0.1});
                 planet2 = new THREE.Mesh(planet2Geometry, planet2Material);
                 planet2.castShadow = true;
                 planet2.receiveShadow = true;
