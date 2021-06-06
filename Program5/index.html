@@ -91,7 +91,7 @@
 					roughness: 0.5,
 					metalness: 1.0
 				} );
-                textureLoader.load( './three.js-master/ulukai/2k_neptune.jpg', function ( map ) {
+                textureLoader.load( './ulukai/2k_neptune.jpg', function ( map ) {
                     map.anisotropy = 4;
                     map.encoding = THREE.sRGBEncoding;
                     planet1Material.map = map;
@@ -113,7 +113,7 @@
 					roughness: 0.5,
 					metalness: 1.0
 				} );
-                textureLoader.load( './three.js-master/ulukai/2k_makemake_fictional.jpg', function ( map ) {
+                textureLoader.load( './ulukai/2k_makemake_fictional.jpg', function ( map ) {
                     map.anisotropy = 4;
                     map.encoding = THREE.sRGBEncoding;
                     planet2Material.map = map;
@@ -135,7 +135,7 @@
 					roughness: 0.5,
 					metalness: 1.0
 				} );
-                textureLoader.load( './three.js-master/ulukai/2k_venus_surface.jpg', function ( map ) {
+                textureLoader.load( './ulukai/2k_venus_surface.jpg', function ( map ) {
                     map.anisotropy = 4;
                     map.encoding = THREE.sRGBEncoding;
                     planet3Material.map = map;
@@ -187,12 +187,12 @@
 
                 // skybox
                 let materialArray = [];
-                let texture_ft = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_ft.png');
-                let texture_bk = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_bk.png');
-                let texture_up = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_up.png');
-                let texture_dn = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_dn.png');
-                let texture_rt = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_rt.png');
-                let texture_lf = new THREE.TextureLoader().load( './three.js-master/ulukai/corona_lf.png');
+                let texture_ft = new THREE.TextureLoader().load( './ulukai/corona_ft.png');
+                let texture_bk = new THREE.TextureLoader().load( './ulukai/corona_bk.png');
+                let texture_up = new THREE.TextureLoader().load( './ulukai/corona_up.png');
+                let texture_dn = new THREE.TextureLoader().load( './ulukai/corona_dn.png');
+                let texture_rt = new THREE.TextureLoader().load( './ulukai/corona_rt.png');
+                let texture_lf = new THREE.TextureLoader().load( './ulukai/corona_lf.png');
 
                 materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
                 materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
