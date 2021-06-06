@@ -19,9 +19,9 @@
 		</style>
 	</head>
 	<body>
-		<script src="../lib/three.js"></script>
-        <script src="../lib/OrbitControls.js"></script>
 		<script type="module">
+            import * as THREE from './three.js-master/build/three.module.js';
+            import { OrbitControls } from './three.js-master/examples/jsm/controls/OrbitControls.js';
             import { Water } from './three.js-master/examples/jsm/objects/Water.js';
 
             let scene, camera, controls, renderer, bulb, lightMaterial;
@@ -76,7 +76,7 @@
                 // camera setup
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 30000);
-                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls = new OrbitControls(camera, renderer.domElement);
                 camera.position.z = 50;
                 camera.position.y = 25;
                 controls.update();
