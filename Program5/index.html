@@ -4,8 +4,8 @@
 // amoulios
 // etqnguye
 // 
-// Assignment 4
-// Camera Movement
+// Assignment 5
+// Three.js
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
 
@@ -33,27 +33,6 @@
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-
-            function getBase64FromImageUrl(url) {
-                var img = new Image();
-
-                img.setAttribute('crossOrigin', 'anonymous');
-
-                img.onload = function () {
-                    var canvas = document.createElement("canvas");
-                    canvas.width =this.width;
-                    canvas.height =this.height;
-
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(this, 0, 0);
-
-                    var dataURL = canvas.toDataURL("image/png");
-
-                    alert(dataURL.replace(/^data:image\/(png|jpg);base64,/, ""));
-                };
-
-                img.src = url;
             }
 
             // create objects
