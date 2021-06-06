@@ -1,0 +1,71 @@
+<!--
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Autumn Moulios ~ Ethan Nguyen ~ 4/25/2021 ~ CSE 160
+// amoulios
+// etqnguye
+// 
+// Assignment 4
+// Camera Movement
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Program 5: Three.js</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+        <h1>CSE 160 Program 5</h1>
+        <h3>Autumn Moulios (amoulios)</br>
+        Ethan Nguyen (etqnguye)</h3>
+
+        <h1>Eclipse:</h1>
+        Our project features a set of circular planets orbiting around a single light source above an infinite ocean. </br>
+        This is to highlight our work with texturing and shadows (Every so often planets will cause an Eclipse on another planet)</br>
+
+        <h3>Features Added:</h3>
+        Sphere and Plane Objects</br>
+        Object Movement</br>
+        Point Lighting</br>
+        Camera Orbit Controls</br>
+        Texturing</br>
+        - Shaded Textures too!</br>
+        Skybox</br>
+        Shadows</br>
+        Animated Water</br>
+            - with Reflections</br></br>
+
+        <b>Sphere and Plane Objects:</b></br>
+        We created these using the three.js standard mesh. The spheres have 15 cross sections in each direction.</br>
+        <b>Object Movement:</b></br>
+        We used trig functions to map the planets' positions to a circular orbit around the light source.</br>
+        <b>Point Lighting:</b></br>
+        Our "Sun" is a single point light represented by a bright white sphere. It's light falloff is really small so that it lights up far away objects and our project looks more like a solar system.</br>
+        <b>Camera Orbit Controls:</b></br>
+        By default, our camera looks at the sun and can be controlled using the left mouse button to orbit, right mouse button to move left/right, and scroll wheel to move forward/back</br>
+        <b>Texturing:</b></br>
+        We load textures using the built in texture loader from three.js, and applied a map to allow lighting to affect the textures. This can be seen on the planets, which are constantly rotating.</br>
+        <b>Skybox:</b></br>
+        Once we figured out textures, we created a skybox using a giant cube (20,000 x 20,000 x 20,000) with the textures on the inside.</br>
+        <b>Shadows:</b></br>
+        Shadows are built into the three.js lighting system, and we decided to showcase them by using a solar system.</br>
+        <b>Animated Water:</b></br>
+        The water is a giant plane with a texture that changes as the Water Object's time value is increased. Three.js handles all of the nitty gritty lighting details. We used the water texture included in three.js examples.</br>
+        
+        </br>
+        </br>
+        <h4>Code Reference for Water and Skybox:</h4>
+        <a href="https://threejs.org/examples/#webgl_shaders_ocean">WebGL Shaders Ocean</a>
+        <h4>Code Reference for Lighting and Textures:</h4>
+        <a href="https://threejs.org/examples/#webgl_lights_physical">WebGL Lights Physical</a>
+
+        <h4>Skybox Texture:</h4>
+        <a href="https://opengameart.org/content/ulukais-space-skyboxes">Ulukai's Space Skyboxes</a>
+        <h4>Planet Textures:</h4>
+        <a href="https://www.solarsystemscope.com/textures/download/2k_haumea_fictional.jpg">Planet 1</a></br>
+        <a href="https://www.solarsystemscope.com/textures/download/2k_neptune.jpg">Planet 2</a></br>
+        <a href="https://www.solarsystemscope.com/textures/download/2k_makemake_fictional.jpg">Planet 3</a></br>
