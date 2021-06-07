@@ -1,0 +1,238 @@
+<!--
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Autumn Moulios ~ Ethan Nguyen ~ 4/25/2021 ~ CSE 160
+// amoulios
+// etqnguye
+// 
+// Assignment 5
+// Three.js
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Program 5: Three.js</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<script type="module">
+            import * as THREE from './three.js-master/build/three.module.js';
+            import { OrbitControls } from './three.js-master/examples/jsm/controls/OrbitControls.js';
+            import { Water } from './three.js-master/examples/jsm/objects/Water.js';
+
+            let scene, camera, controls, renderer, bulb, lightMaterial;
+            let plane, planet1, planet2, planet3;
+            let water;
+            let t = 0;
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            // create objects
+			init();
+            // resize window when necessary
+            window.addEventListener('resize', onWindowResize, false); 
+            animate();
+            
+            function init() {
+                // rendering settings
+                renderer = new THREE.WebGLRenderer();
+                renderer.physicallyCorrectLights = true;
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				renderer.shadowMap.enabled = true;
+				renderer.toneMapping = THREE.ReinhardToneMapping;
+				renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                document.body.appendChild( renderer.domElement );
+
+                // camera setup
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 30000);
+                controls = new OrbitControls(camera, renderer.domElement);
+                camera.position.z = 50;
+                camera.position.y = 25;
+                controls.update();
+                
+                //load textures
+                const textureLoader = new THREE.TextureLoader();
+
+                //planet1 texture
+
+                let planet1Material = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+					roughness: 0.5,
+					metalness: 1.0
+				} );
+                textureLoader.load( './ulukai/2k_neptune.jpg', function ( map ) {
+                    map.anisotropy = 4;
+                    map.encoding = THREE.sRGBEncoding;
+                    planet1Material.map = map;
+                    planet1Material.needsUpdate = true;
+
+                } );
+
+                // planet1 
+                const planet1Geometry = new THREE.SphereGeometry(2, 15, 15);
+                planet1 = new THREE.Mesh(planet1Geometry, planet1Material);
+                planet1.castShadow = true;
+                planet1.receiveShadow = true;
+                scene.add(planet1);
+
+                //planet2 texture
+
+                let planet2Material = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+					roughness: 0.5,
+					metalness: 1.0
+				} );
+                textureLoader.load( './ulukai/2k_makemake_fictional.jpg', function ( map ) {
+                    map.anisotropy = 4;
+                    map.encoding = THREE.sRGBEncoding;
+                    planet2Material.map = map;
+                    planet2Material.needsUpdate = true;
+
+                } );
+
+                // planet2
+                const planet2Geometry = new THREE.SphereGeometry(3, 15, 15);
+                planet2 = new THREE.Mesh(planet2Geometry, planet2Material);
+                planet2.castShadow = true;
+                planet2.receiveShadow = true;
+                scene.add(planet2);
+
+                //planet3 texture
+
+                let planet3Material = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+					roughness: 0.5,
+					metalness: 1.0
+				} );
+                textureLoader.load( './ulukai/2k_venus_surface.jpg', function ( map ) {
+                    map.anisotropy = 4;
+                    map.encoding = THREE.sRGBEncoding;
+                    planet3Material.map = map;
+                    planet3Material.needsUpdate = true;
+
+                } );
+
+                // planet3
+                const planet3Geometry = new THREE.SphereGeometry(1, 15, 15);
+                planet3 = new THREE.Mesh(planet3Geometry, planet3Material);
+                planet3.castShadow = true;
+                planet3.receiveShadow = true;
+                scene.add(planet3);
+
+                // water
+                const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+
+                water = new Water(
+                    waterGeometry,
+                    {
+                        textureWidth: 512,
+                        textureHeight: 512,
+                        waterNormals: new THREE.TextureLoader().load('three.js-master/examples/textures/waternormals.jpg', function (texture) {
+                            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                        }),
+
+						waterColor: 0xffffff,
+						distortionScale: 10,
+						fog: scene.fog !== undefined
+                    }
+                )
+                water.rotation.x = - Math.PI / 2;
+                water.position.y = -10;
+                scene.add(water);
+
+                // lighting
+                const lightGeometry = new THREE.SphereGeometry(5, 16, 16);
+                bulb = new THREE.PointLight(0xffffff, 1, 200, 0.1);
+                lightMaterial = new THREE.MeshPhongMaterial( {
+                    emissive: 0xffffee,
+                    emissiveIntensity: 1,
+                    color: 0x000000
+                } );
+                bulb.add(new THREE.Mesh(lightGeometry, lightMaterial));
+                bulb.position.set(0, 0, 0);
+                bulb.castShadow = true;
+                scene.add(bulb);
+                
+
+                // skybox
+                let materialArray = [];
+                let texture_ft = new THREE.TextureLoader().load( './ulukai/corona_ft.png');
+                let texture_bk = new THREE.TextureLoader().load( './ulukai/corona_bk.png');
+                let texture_up = new THREE.TextureLoader().load( './ulukai/corona_up.png');
+                let texture_dn = new THREE.TextureLoader().load( './ulukai/corona_dn.png');
+                let texture_rt = new THREE.TextureLoader().load( './ulukai/corona_rt.png');
+                let texture_lf = new THREE.TextureLoader().load( './ulukai/corona_lf.png');
+
+                materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
+                materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
+                materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
+                materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
+                materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
+                materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+
+                for (let i = 0; i < 6; i++) 
+                    materialArray[i].side = THREE.BackSide;
+
+                let skyboxGeo = new THREE.BoxGeometry( 10000, 10000, 10000);
+                let skybox = new THREE.Mesh( skyboxGeo, materialArray );
+                scene.add( skybox );  
+               
+                const ambient = new THREE.AmbientLight(0x404040);
+                scene.add(ambient);
+            }
+
+            function animate() {
+                // increase variable for calculations later
+                if (t == 1) t = 0;
+                t += 0.001;
+
+	            requestAnimationFrame( animate );
+                calculatePlanetOrbits();
+	            render();
+            }
+
+            function calculatePlanetOrbits() {
+                planet1.position.x = 40 * Math.cos(1 * Math.PI * t + 1);
+                planet1.position.z = 40 * Math.sin(1 * Math.PI * t + 1);
+                planet1.position.y = Math.cos(0.5 * Math.PI * t);
+                planet1.rotation.y += 0.01;
+
+                //camera.lookAt(planet1.position.x, planet1.position.y, planet1.position.z);
+
+                planet2.position.x = 25 * Math.cos(3 * Math.PI * t);
+                planet2.position.z = 25 * Math.sin(3 * Math.PI * t);
+                planet2.position.y = 0;
+                planet2.rotation.y += 0.01;
+
+                planet3.position.x = 12 * Math.cos(4 * Math.PI * t);
+                planet3.position.z = 12 * Math.sin(4 * Math.PI * t);
+                planet3.position.y = 2 * Math.cos(Math.PI * t);
+                planet3.rotation.y += 0.01;
+
+                water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+            }
+
+            function render() {
+                renderer.toneMappingExposure = Math.pow(0.68, 5.0); // to allow for very bright scenes.
+				renderer.shadowMap.enabled = true;
+				bulb.castShadow = true;
+
+				bulb.power = 400;
+				lightMaterial.emissiveIntensity = bulb.intensity / Math.pow(0.02, 2.0); // convert from intensity to irradiance at bulb surface
+                
+                renderer.render( scene, camera );
+            }
+            
+		</script>
+	</body>
+</html>
